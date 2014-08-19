@@ -5,6 +5,7 @@ class GO_Content_Widgets
 	public $id_base = 'go-content-widgets';
 	private $admin;
 	private $script_config;
+	private $layout_preferences;
 
 	/**
 	 * constructor
@@ -23,6 +24,12 @@ class GO_Content_Widgets
 		{
 			$this->admin();
 		}//end if
+
+		$data = array(
+			'layout_preferences' => get_option( $this->id_base . '-layout-preferences' ),
+		);
+		// @TODO: tie this to the front-end go-content-widgets JS rather than jquery
+		wp_localize_script( 'jquery', 'go_content_stats', $data );
 	}//end init
 
 	/**
@@ -56,6 +63,19 @@ class GO_Content_Widgets
 
 		return $this->admin;
 	}//end admin
+
+	/**
+	 * returns the widget layout preferences for the site
+	 */
+	public function layout_preferences()
+	{
+		if ( ! $this->layout_preferences )
+		{
+			$this->layout_preferences = get_option( $this->id_base . '-layout-preferences', array() );
+		}//end if
+
+		return $this->layout_preferences;
+	}//end layout_preferences
 }//end class
 
 function go_content_widgets()
