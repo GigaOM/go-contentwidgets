@@ -24,10 +24,16 @@ class GO_Content_Widgets
 			$this->admin();
 		}//end if
 
-		if ( is_singular() )
-		{
-			add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) );
-		}// end if
+		wp_register_script(
+			$this->id_base,
+			plugins_url( 'js/lib/go-content-widgets.js', __FILE__ ),
+			array( 'jquery' ),
+			$this->script_config( 'version' ),
+			TRUE
+		);
+
+		// @todo this should only happen on `is_single`, but it was giving me trouble so I I'm moving on...
+		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) );
 	}//end init
 
 	/**
@@ -64,8 +70,7 @@ class GO_Content_Widgets
 
 	public function wp_enqueue_scripts()
 	{
-		wp_register_script( 'go-content-widgets', plugins_url( 'js/go-content-widgets.js', __FILE__ ), array(), $this->script_config( 'version' ), TRUE );
-		wp_enqueue_script( 'go-content-widgets' );
+		wp_enqueue_script( $this->id_base );
 	}//end wp_enqueue_scripts
 }//end class
 

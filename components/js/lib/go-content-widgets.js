@@ -1,6 +1,15 @@
 var go_content_widgets = {
-	layout_strategy: {}
+	insert: [],
+	inventory: {
+		p: [],
+		blackouts: [],
+		gaps: [],
+		spaces: []
+	},
+	layout_strategy: {},
+	non_blockers: [ 'blockquote', 'h1,h2,h3,h4,h5,h6' ]
 };
+
 (function( $ ) {
 	'use strict';
 
@@ -9,8 +18,7 @@ var go_content_widgets = {
 		this.$content = this.$body.find( '> div' );
 		this.$alignleft = this.$content.find( '.alignleft' );
 		this.$alignright = this.$content.find( '.alignright' );
-		this.current_strategy = 'ordered';
-		this.current_strategy_type = 'many_300x250';
+		this.$widgets = $( '#sidebar > div' );
 
 		// @TODO: the following CSS rules should be ported to the base theme
 		this.$body.css( 'overflow', 'visible' );
@@ -19,13 +27,24 @@ var go_content_widgets = {
 		this.$alignright.css( 'margin-right', '-172px' );
 		this.$alignleft.css( 'border-right', '1.25rem solid #fff' );
 		this.$alignleft.css( 'border-left', '1.25rem solid #fff' );
-		$( 'body' ).addClass( 'go-content-widgets-bigger-font' );
 
-		// @TODO: I think this is only needed for the test panel.  Remove?
 		$( 'body' ).addClass( 'go-content-widgets' );
 
-		this.insert = {};
+		this.$widgets.each( function() {
+			var id = $( this ).attr( 'id' );
+
+			$( this ).addClass( 'layout-box-insert' ); // @todo, this may not be needed long term, but for now it makes the CSS easier
+			$( this ).addClass( 'layout-box-insert-right' );
+
+			go_content_widgets.insert.push( {
+				name: id,
+				$el: $( this ),
+				height: $( this ).outerHeight( true ) // @todo this is larger than needed, shrink it.
+			} );
+		} );
+
 		// @TODO: pull these from the sidebar widget area
+		/*
 		this.insert.adb = {
 			name: 'Ad 300x250 B',
 			$el: this.generate_box( {
@@ -38,110 +57,7 @@ var go_content_widgets = {
 			} ),
 			height: 260 // set to the required height, not the actual height
 		};
-		this.insert.ad_300x600 = {
-			name: 'Ad 300x600',
-			$el: this.generate_box( {
-				name: 'Ad 300x600',
-				html_id: 'add-300x600',
-				element_id: 'ad_300x600',
-				height: '616px',
-				color: 'red',
-				location: 'right'
-			} ),
-			height: 550 // set to the required height, not the actual height
-		};
-		this.insert.adc = {
-			name: 'Ad 300x250 C',
-			$el: this.generate_box( {
-				name: 'Ad 300x250 C',
-				html_id: 'adC',
-				element_id: 'adc',
-				height: '266px',
-				color: 'red',
-				location: 'right'
-			} ),
-			height: 260, // set to the required height, not the actual height
-			preferbottom: true
-		};
-		this.insert.auto3 = {
-			name: 'Auto 3',
-			$el: this.generate_box( {
-				name: 'Auto 3',
-				html_id: 'auto3',
-				element_id: 'auto3',
-				height: '375px',
-				color: 'blue',
-				location: 'left'
-			} ),
-			height: 370 // set to the required height, not the actual height
-		};
-		this.insert.autoe = {
-			name: 'Auto E',
-			$el: this.generate_box( {
-				name: 'Auto E',
-				html_id: 'autoe',
-				element_id: 'autoe',
-				height: '325px',
-				color: 'blue',
-				location: 'left'
-			} ),
-			height: 270 // set to the required height, not the actual height
-		};
-		this.insert.newsletter = {
-			name: 'Newsletter Subscription',
-			$el: this.generate_box( {
-				name: 'Newsletter Subscription',
-				html_id: 'newsletter-sub',
-				element_id: 'newsletter',
-				height: '280px',
-				color: 'blue',
-				location: 'left'
-			} ),
-			height: 260 // set to the required height, not the actual height
-		};
-		this.insert.add = {
-			name: 'Ad 300x250 D',
-			$el: this.generate_box( {
-				name: 'Ad 300x250 D',
-				html_id: 'adD',
-				element_id: 'add',
-				height: '266px',
-				color: 'red',
-				location: 'right'
-			} ),
-			height: 260 // set to the required height, not the actual height
-		};
-		this.insert.ade = {
-			name: 'Ad 300x250 E',
-			$el: this.generate_box( {
-				name: 'Ad 300x250 E',
-				html_id: 'adE',
-				element_id: 'ade',
-				height: '266px',
-				color: 'red',
-				location: 'right'
-			} ),
-			height: 260 // set to the required height, not the actual height
-		};
-		this.insert.adf = {
-			name: 'Ad 300x250 F',
-			$el: this.generate_box( {
-				name: 'Ad 300x250 F',
-				html_id: 'adF',
-				element_id: 'adf',
-				height: '266px',
-				color: 'red',
-				location: 'right'
-			} ),
-			height: 260 // set to the required height, not the actual height
-		};
-
-		this.inventory = {
-			p: [],
-			blackouts: [],
-			gaps: [],
-			spaces: []
-		};
+		*/
 
 		this.css = '<style class="layout-box-css">' +
 			'.go-content-widgets #body {' +
@@ -153,11 +69,11 @@ var go_content_widgets = {
 			'.go-content-widgets .post {' +
 				'width: 624px;' +
 			'}' +
-			'.go-content-widgets-bigger-font .entry-content {' +
+			'.go-content-widgets .entry-content {' +
 				'font-size: 1.125rem;' +
 				'line-height: 26px;' +
 			'}' +
-			'.go-content-widgets-bigger-font .entry-content p {' +
+			'.go-content-widgets .entry-content p {' +
 				'margin-bottom: 24px;' +
 			'}' +
 			'.go-content-widgets #sidebar {' +
@@ -190,7 +106,6 @@ var go_content_widgets = {
 			 	'color: white' +
 			 '}' +
 			'.layout-box-insert {' +
-				'background: red;' +
 				'margin-bottom: 1rem;' +
 				'width:300px;' +
 			'}' +
@@ -214,14 +129,6 @@ var go_content_widgets = {
 
 		this.calc();
 		this.auto_inject();
-	};
-
-	go_content_widgets.init_panel = function() {
-
-		$( document ).on( 'change', '.gigaom-layout-test-panel .blockers .blocker input', function() {
-			go_content_widgets.calc();
-			go_content_widgets.auto_inject();
-		});
 	};
 
 	// @TODO: remove this function once we are pulling from the widget area for elements
@@ -316,15 +223,9 @@ var go_content_widgets = {
 		// find top level blackouts
 		this.$content.find( '> *:visible:not(p):not(ol):not(ul):not(script)' ).each( function() {
 			var $el = $( this );
-			var $non_blockers = $( '.gigaom-layout-test-panel .blockers input:not(:checked)' );
-			var non_blockers = {};
 
-			$non_blockers.each( function() {
-				non_blockers[ $( this ).attr( 'name' ) ] = $( this ).data( 'selector' );
-			});
-
-			for ( var i in non_blockers ) {
-				if ( $el.is( non_blockers[ i ] ) ) {
+			for ( var i in this.non_blockers ) {
+				if ( $el.is( this.non_blockers[ i ] ) ) {
 					return;
 				}//end if
 			}//end for
@@ -583,4 +484,7 @@ var go_content_widgets = {
 		return go_content_widgets.get_tag_ref( $el );
 	};
 
+	$( function() {
+		go_content_widgets.init();
+	});
 })( jQuery );
