@@ -39,7 +39,7 @@ var go_content_widgets = {
 			go_content_widgets.insert.push( {
 				name: id,
 				$el: $( this ),
-				height: $( this ).outerHeight( true ) // @todo this is larger than needed, shrink it.
+				height: parseInt( $( this ).outerHeight( true ) * 0.9, 10 )
 			} );
 		} );
 
