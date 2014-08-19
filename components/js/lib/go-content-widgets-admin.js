@@ -1,7 +1,8 @@
 if ( 'undefined' === typeof go_content_widgets_admin ) {
 	var go_content_widgets_admin = {
-		// @TODO: set this via wp_localize_script
-		sidebar_id: 'gigaom-single-sidebar'
+		// this ultimately gets set via wp_localize_script, set it to a dummy value as a default
+		sidebar_id: 'this-should-be-set-via-wp-localize-script',
+		layout_preferences: {}
 	};
 }//end if
 
@@ -14,18 +15,48 @@ if ( 'undefined' === typeof go_content_widgets_admin ) {
 	go_content_widgets_admin.init = function() {
 		this.$sidebar = $( '#' + this.sidebar_id );
 		this.inject_fields();
+
+		// when preferences are changed, save them in the local preference object
+		$( document ).on( 'change', '.go-content-widgets-fields .layout-preference', function() {
+			var $el = $( this );
+			var $widget = $el.closest( '.widget' );
+
+			go_content_widgets_admin.layout_preferences[ $widget.attr( 'id' ) ] = $el.val();
+		});
+
+		// watch all ajax completions and if it is a completion of "save-widget", refresh the fields.
+		$( document ).ajaxComplete( function( event, jqxhr, ajax_options ) {
+			var data = decodeURIComponent( ajax_options.data );
+			if ( ! data.match( /\&action\=save\-widget\&/ ) ) {
+				return;
+			}
+
+			go_content_widgets_admin.refresh_fields();
+		});
 	};
 
+	/**
+	 * clears out content widget preference fields from DOM and re-adds them
+	 */
+	go_content_widgets_admin.refresh_fields = function() {
+		this.$sidebar.find( '.go-content-widgets-fields' ).remove();
+		this.inject_fields();
+	};
+
+	/**
+	 * injects preference select box and auto-selects the current preference for the widget
+	 */
 	go_content_widgets_admin.inject_fields = function() {
 		this.$sidebar.find( '.widget' ).each( function() {
 			var $widget = $( this );
+			var widget_id = $widget.attr( 'id' );
 			var $fields = $(
 				'<div class="go-content-widgets-fields">' +
 					'<p>' +
-						'<label for="go-content-widgets_' + $widget.attr( 'id' ) + '">' +
+						'<label for="go-content-widgets_' + widget_id + '">' +
 							'Placement preference:' +
 						'</label>' +
-						'<select name="go-content-widgets[' + $widget.attr('id') +']" id="go-content-widgets_' + $widget.attr( 'id' ) + '">' +
+						'<select class="layout-preference widefat" name="go-content-widgets[' + widget_id +']" id="go-content-widgets_' + widget_id + '">' +
 							'<option value="any">No preference</option>' +
 							'<option value="full">Full width</option>' +
 							'<option value="left">Left</option>' +
@@ -35,7 +66,9 @@ if ( 'undefined' === typeof go_content_widgets_admin ) {
 				'</div>'
 			);
 
-			// @TODO: apply current widget settings
+			if ( 'undefined' !== typeof go_content_widgets_admin.layout_preferences[ widget_id ] ) {
+				$fields.find( '.layout-preference' ).val( go_content_widgets_admin.layout_preferences[ widget_id ] );
+			}//end if
 
 			$widget.find( '.widget-content' ).append( $fields );
 		});
