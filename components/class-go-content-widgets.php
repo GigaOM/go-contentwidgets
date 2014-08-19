@@ -50,8 +50,8 @@ class GO_Content_Widgets
 	{
 		if ( ! $this->admin )
 		{
-			require_once __DIR__ . '/class-go-content-stats-admin.php';
-			$this->admin = new GO_Content_Stats_Admin;
+			require_once __DIR__ . '/class-go-content-widgets-admin.php';
+			$this->admin = new GO_Content_Widgets_Admin;
 		}//end if
 
 		return $this->admin;

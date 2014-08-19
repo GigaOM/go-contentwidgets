@@ -30,7 +30,6 @@ class GO_Content_Widgets_Admin
 	public function current_screen()
 	{
 		$screen = get_current_screen();
-		do_action( 'debug_robot', print_r( $screen, TRUE ) );
 
 		$this->register_resources();
 
