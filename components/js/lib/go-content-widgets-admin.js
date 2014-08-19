@@ -15,6 +15,27 @@ if ( 'undefined' === typeof go_content_widgets_admin ) {
 	go_content_widgets_admin.init = function() {
 		this.$sidebar = $( '#' + this.sidebar_id );
 		this.inject_fields();
+
+		$( document ).on( 'change', '.go-content-widgets-fields .layout-preference', function() {
+			var $el = $( this );
+			var $widget = $el.closest( '.widget' );
+
+			go_content_widgets_admin.layout_preferences[ $widget.attr( 'id' ) ] = $el.val();
+		});
+
+		$( document ).ajaxComplete( function( event, jqxhr, ajax_options ) {
+			var data = decodeURIComponent( ajax_options.data );
+			if ( ! data.match( /\&action\=save\-widget\&/ ) ) {
+				return;
+			}
+
+			go_content_widgets_admin.refresh_fields();
+		});
+	};
+
+	go_content_widgets_admin.refresh_fields = function() {
+		this.$sidebar.find( '.go-content-widgets-fields' ).remove();
+		this.inject_fields();
 	};
 
 	go_content_widgets_admin.inject_fields = function() {
