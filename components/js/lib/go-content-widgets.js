@@ -54,18 +54,30 @@ if ( 'undefined' === typeof go_content_widgets ) {
 			var widget = {
 				name: widget_id,
 				$el: $( this ),
-				height: parseInt( $( this ).outerHeight( true ) * 0.9, 10 )
+				height: parseInt( $( this ).outerHeight( true ) * 0.9, 10 ),
+				location: 'right',
+				preferbottom: false
 			};
 
-			if (
-				'undefined' !== typeof go_content_widgets.layout_preferences[ widget_id ]
-				&& 'any' !== go_content_widgets.layout_preferences[ widget_id ]
-			) {
-				widget.location = go_content_widgets.layout_preferences[ widget_id ];
+			if ( 'undefined' !== typeof go_content_widgets.layout_preferences[ widget_id ] ) {
+				if (
+					'undefined' !== typeof go_content_widgets.layout_preferences[ widget_id ].direction
+					&& 'bottom' === go_content_widgets.layout_preferences[ widget_id ].direction
+				) {
+					widget.preferbottom = true;
+				}//end if
+
+				if (
+					'undefined' !== typeof go_content_widgets.layout_preferences[ widget_id ].location
+					&& 'any' !== go_content_widgets.layout_preferences[ widget_id ].location
+				) {
+					widget.location = go_content_widgets.layout_preferences[ widget_id ].location;
+				}//end if
+			}//end if
+
+			if ( widget.location ) {
 				$( this ).addClass( 'layout-box-insert-' + widget.location );
-			} else {
-				$( this ).addClass( 'layout-box-insert-right' );
-			}//end else
+			}//end if
 
 			go_content_widgets.insert.push( widget );
 		} );
@@ -153,11 +165,8 @@ if ( 'undefined' === typeof go_content_widgets ) {
 
 		this.calc();
 		this.auto_inject();
-	};
-
-	// @TODO: remove this function once we are pulling from the widget area for elements
-	go_content_widgets.generate_box = function( args ) {
-		return $( '<div id="' + args.html_id + '" data-element="' + args.element_id + '" class="layout-box-insert layout-box-insert-' + args.location + '" style="height:' + args.height + ';background:' + args.color + '"><div>' + args.name + '</div></div>' );
+		// @TODO: this removes the overlays. We need to keep it but we have to remove the styles that color them. Disabling for testing/debugging
+		//$( '.layout-box-thing' ).remove();
 	};
 
 	/**
@@ -245,7 +254,7 @@ if ( 'undefined' === typeof go_content_widgets ) {
 
 	go_content_widgets.identify_blackouts = function() {
 		// find top level blackouts
-		this.$content.find( '> *:visible:not(p):not(ol):not(ul):not(script)' ).each( function() {
+		this.$content.find( '> *:visible:not(p):not(ol):not(ul):not(script):not(address)' ).each( function() {
 			var $el = $( this );
 
 			for ( var i in this.non_blockers ) {

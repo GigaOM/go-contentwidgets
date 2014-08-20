@@ -21,7 +21,15 @@ if ( 'undefined' === typeof go_content_widgets_admin ) {
 			var $el = $( this );
 			var $widget = $el.closest( '.widget' );
 
-			go_content_widgets_admin.layout_preferences[ $widget.attr( 'id' ) ] = $el.val();
+			if ( 'undefined' === typeof go_content_widgets_admin.layout_preferences[ $widget.attr( 'id' ) ] ) {
+				go_content_widgets_admin.layout_preferences[ $widget.attr( 'id' ) ] = {};
+			}//end if
+
+			if ( $el.is( '.location' ) ) {
+				go_content_widgets_admin.layout_preferences[ $widget.attr( 'id' ) ].location = $el.val();
+			} else {
+				go_content_widgets_admin.layout_preferences[ $widget.attr( 'id' ) ].direction = $el.val();
+			}//end else
 		});
 
 		// watch all ajax completions and if it is a completion of "save-widget", refresh the fields.
@@ -53,21 +61,36 @@ if ( 'undefined' === typeof go_content_widgets_admin ) {
 			var $fields = $(
 				'<div class="go-content-widgets-fields">' +
 					'<p>' +
-						'<label for="go-content-widgets_' + widget_id + '">' +
-							'Placement preference:' +
+						'<label for="go-content-widgets_' + widget_id + '_location">' +
+							'Horizontal placement preference:' +
 						'</label>' +
-						'<select class="layout-preference widefat" name="go-content-widgets[' + widget_id +']" id="go-content-widgets_' + widget_id + '">' +
+						'<select class="layout-preference location widefat" name="go-content-widgets[' + widget_id +'][location]" id="go-content-widgets_' + widget_id + '_location">' +
 							'<option value="any">No preference</option>' +
 							'<option value="full">Full width</option>' +
 							'<option value="left">Left</option>' +
 							'<option value="right">Right</option>' +
 						'</select>' +
 					'</p>' +
+					'<p>' +
+						'<label for="go-content-widgets_' + widget_id + '_direction">' +
+							'Insert from the ' +
+						'</label>' +
+						'<select class="layout-preference direction widefat" name="go-content-widgets[' + widget_id +'][direction]" id="go-content-widgets_' + widget_id + '_direction">' +
+							'<option value="">top</option>' +
+							'<option value="bottom">bottom</option>' +
+						'</select>' +
+					'</p>' +
 				'</div>'
 			);
 
 			if ( 'undefined' !== typeof go_content_widgets_admin.layout_preferences[ widget_id ] ) {
-				$fields.find( '.layout-preference' ).val( go_content_widgets_admin.layout_preferences[ widget_id ] );
+				if ( 'undefined' !== typeof go_content_widgets_admin.layout_preferences[ widget_id ].location ) {
+					$fields.find( '.layout-preference.location' ).val( go_content_widgets_admin.layout_preferences[ widget_id ].location );
+				}//end if
+
+				if ( 'undefined' !== typeof go_content_widgets_admin.layout_preferences[ widget_id ].direction ) {
+					$fields.find( '.layout-preference.direction' ).val( go_content_widgets_admin.layout_preferences[ widget_id ].direction );
+				}//end if
 			}//end if
 
 			$widget.find( '.widget-content' ).append( $fields );

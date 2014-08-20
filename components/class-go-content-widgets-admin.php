@@ -80,6 +80,7 @@ class GO_Content_Widgets_Admin
 			$key = preg_replace( '/^widget(-[0-9]*)?_/', '', $key );
 			$widget_preferences[ $key ] = $preference;
 		}//end foreach
+		do_action( 'debug_robot', print_r( $widget_preferences, TRUE ) );
 
 		// get rid of elements that don't exist in the sidebar anymore
 		foreach ( $widget_preferences as $widget => $preference )
