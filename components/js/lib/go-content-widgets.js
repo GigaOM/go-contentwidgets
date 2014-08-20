@@ -20,23 +20,11 @@ if ( 'undefined' === typeof go_content_widgets ) {
 			'h1,h2,h3,h4,h5,h6'
 		];
 
-		this.$body = $( '.post section.body.entry-content' );
+		this.$body = $( '#body' ).find( '.post section.body.entry-content' );
 		this.$content = this.$body.find( '> div' );
-		this.$alignleft = this.$content.find( '.alignleft' );
-		this.$alignright = this.$content.find( '.alignright' );
 		this.$widgets = $( '#hidden-sidebar > div' );
 
-		// @TODO: the following CSS rules should be ported to the base theme
-		this.$body.css( 'overflow', 'visible' );
-		this.$content.css( 'position', 'relative' );
-		this.$alignleft.css( 'margin-left', '-112px' );
-		this.$alignright.css( 'margin-right', '-172px' );
-		this.$alignleft.css( 'border-right', '1.25rem solid #fff' );
-		this.$alignleft.css( 'border-left', '1.25rem solid #fff' );
-
-		$( 'body' ).addClass( 'go-content-widgets' );
-
-		$( '#body > .main > .go-full-post .entry-content img' ).each( function() {
+		this.$content.find( 'img' ).each( function() {
 			var $img = $( this );
 
 			if ( $img.attr( 'width' ) < $img.closest( '.entry-content' ).width() ) {
@@ -82,99 +70,21 @@ if ( 'undefined' === typeof go_content_widgets ) {
 			go_content_widgets.insert.push( widget );
 		} );
 
-		// @TODO: pull these from the sidebar widget area
-		/*
-		this.insert.adb = {
-			name: 'Ad 300x250 B',
-			$el: this.generate_box( {
-				name: 'Ad 300x250 B',
-				html_id: 'adB',
-				element_id: 'adb',
-				height: '266px',
-				color: 'red',
-				location: 'right'
-			} ),
-			height: 260 // set to the required height, not the actual height
-		};
-		*/
-
-		this.css = '<style class="layout-box-css">' +
-			'.go-content-widgets #body {' +
-				'float: none;' +
-				'left: -48px;' +
-				'margin: 0 auto;' +
-				'position: relative;' +
-			'}' +
-			'.go-content-widgets .post {' +
-				'width: 624px;' +
-			'}' +
-			'.go-content-widgets .entry-content {' +
-				'font-size: 1.125rem;' +
-				'line-height: 26px;' +
-			'}' +
-			'.go-content-widgets .entry-content p {' +
-				'margin-bottom: 24px;' +
-			'}' +
-			'.go-content-widgets #hidden-sidebar {' +
-				'opacity: 0.075;' +
-				'position: absolute;' +
-				'right: 0;' +
-				'top: 0;' +
-			'}' +
-			'.layout-box-thing {' +
-				'position: absolute;' +
-				'width: 100%;' +
-			'}' +
-			'.layout-box-thing div {' +
-				'bottom: 0;' +
-				'color: white;' +
-				'font-size: 1.5rem;' +
-				'max-height: 3em;' +
-				'left: 0;' +
-				'line-height: 1.5em;' +
-				'margin: auto;' +
-				'position: absolute;' +
-				'right: 0;' +
-				'text-align: center;' +
-				'top: 0;' +
-			'}' +
-			 '.layout-box-insert > div {' +
-			 	'text-align: center;' +
-			 '}' +
-			'.layout-box-insert {' +
-				'margin-bottom: 1rem;' +
-				'width:300px;' +
-			'}' +
-			'.layout-box-insert.layout-box-insert-right {' +
-				'float: right;' +
-				'margin-left: 1.5rem;' +
-				'margin-right: -172px;' +
-			'}' +
-			'.layout-box-insert.layout-box-insert-left {' +
-				'float: left;' +
-				'margin-left: -112px;' +
-				'margin-right: 1.5rem;' +
-			'}' +
-			'.inject-point {' +
-				'background: green;' +
-			'}' +
-		'</style>';
-
-		$( '.layout-box-thing, .layout-box-css, .layout-box-insert' ).remove();
-		this.$content.before( this.css );
-
 		this.calc();
 		this.auto_inject();
 		// @TODO: this removes the overlays. We need to keep it but we have to remove the styles that color them. Disabling for testing/debugging
-		//$( '.layout-box-thing' ).remove();
+		this.$content.find( '.layout-box-thing' ).remove();
+		var d = new Date();
+		console.log( d, d.getMilliseconds() );
+		$( '#body' ).addClass( 'rendered' );
 	};
 
 	/**
 	 * auto injects items in order
 	 */
 	go_content_widgets.auto_inject = function() {
-		for ( var key in go_content_widgets.insert ) {
-			go_content_widgets.inject_item( go_content_widgets.insert[ key ] );
+		for ( var i = 0, length = go_content_widgets.insert.length; i < length; i++ ) {
+			go_content_widgets.inject_item( go_content_widgets.insert[ i ] );
 			go_content_widgets.calc();
 		}// end foreach
 	};
@@ -187,10 +97,8 @@ if ( 'undefined' === typeof go_content_widgets ) {
 	 */
 	go_content_widgets.attributes = function( $el ) {
 		var margin_top = $el.css( 'margin-top' );
-		var margin_bottom = $el.css( 'margin-bottom' );
 
 		margin_top = parseInt( margin_top.replace( 'px', '' ), 10 );
-		margin_bottom = parseInt( margin_bottom.replace( 'px', '' ), 10 );
 
 		var top = parseInt( $el.position().top, 10 );
 		var height = parseInt( $el.outerHeight( true ), 10 );
@@ -201,18 +109,14 @@ if ( 'undefined' === typeof go_content_widgets ) {
 			$el: $el,
 			start: top,
 			end: end,
-			height: height,
-			margin_top: margin_top,
-			margin_bottom: margin_bottom
+			height: height
 		};
 
 		return data;
 	};
 
-	go_content_widgets.overlay = function( $el, start, height, color, type, additional_text ) {
-		additional_text = typeof additional_text !== 'undefined' ? '<br/>' + additional_text : '';
-
-		var $overlay = $( '<div class="layout-box-thing ' + type + '" style="background: ' + color + ';top:' + start + 'px;height:' + height + 'px;"><div>' + height + 'px tall' + additional_text + '</div></div>' );
+	go_content_widgets.overlay = function( $el, start, height, type ) {
+		var $overlay = $( '<div class="layout-box-thing ' + type + '" style="top:' + start + 'px;height:' + height + 'px;"></div>' );
 		if ( 'gap' === type ) {
 			$el.before( $overlay );
 		}//end if
@@ -227,28 +131,18 @@ if ( 'undefined' === typeof go_content_widgets ) {
 	};
 
 	go_content_widgets.reset = function() {
-		$( '.layout-box-thing' ).remove();
+		this.$content.find( '.layout-box-thing' ).remove();
 		this.inventory = {
 			p: [],
 			blackouts: [],
 			gaps: [],
 			spaces: []
 		};
-		$( '.inject-point' ).removeClass( 'inject-point' );
 	};
 
 	go_content_widgets.calc = function() {
 		this.reset();
-
-		// find things (not sure what we are using this for)
-		this.$content.find( '> p, > ol, > ul' ).each( function() {
-			var $el = $( this );
-			var attr = go_content_widgets.attributes( $el );
-			go_content_widgets.inventory.p.push( attr );
-		});
-
 		this.identify_blackouts();
-
 		this.identify_gaps();
 	};
 
@@ -257,8 +151,8 @@ if ( 'undefined' === typeof go_content_widgets ) {
 		this.$content.find( '> *:visible:not(p):not(ol):not(ul):not(script):not(address)' ).each( function() {
 			var $el = $( this );
 
-			for ( var i in this.non_blockers ) {
-				if ( $el.is( this.non_blockers[ i ] ) ) {
+			for ( var i = 0, length = go_content_widgets.non_blockers.length; i < length; i++ ) {
+				if ( $el.is( go_content_widgets.non_blockers[ i ] ) ) {
 					return;
 				}//end if
 			}//end for
@@ -281,14 +175,13 @@ if ( 'undefined' === typeof go_content_widgets ) {
 		});
 
 		// draw the blackout overlays
-		for ( var i in this.inventory.blackouts ) {
+		for ( var i = 0, length = this.inventory.blackouts.length; i < length; i++ ) {
 			var blackout = this.inventory.blackouts[ i ];
-			blackout.ref = go_content_widgets.get_element_type( blackout.$el );
 			if ( blackout.is_child ) {
-				blackout.$overlay = this.overlay( blackout.$el.closest( 'p' ), blackout.start, blackout.height, 'rgba( 0, 0, 0, 0.5 )', 'blackout', blackout.ref );
+				blackout.$overlay = this.overlay( blackout.$el.closest( 'p' ), blackout.start, blackout.height, 'blackout' );
 			}// end if
 			else {
-				blackout.$overlay = this.overlay( blackout.$el, blackout.start, blackout.height, 'rgba( 0, 0, 0, 0.5 )', 'blackout', blackout.ref );
+				blackout.$overlay = this.overlay( blackout.$el, blackout.start, blackout.height, 'blackout' );
 			}// end else
 		}//end for
 
@@ -320,7 +213,7 @@ if ( 'undefined' === typeof go_content_widgets ) {
 		}//end if
 		else {
 			var previous_blackout = null;
-			for ( i in this.inventory.blackouts ) {
+			for ( var i = 0, length = this.inventory.blackouts.length; i < length; i++ ) {
 				var blackout = this.inventory.blackouts[ i ];
 
 				if ( blackout.start > start ) {
@@ -388,20 +281,13 @@ if ( 'undefined' === typeof go_content_widgets ) {
 					//gap.$overlay.remove();
 				}
 			}//end if
-
-			// execute common code on gaps
-			for ( i in this.inventory.gaps ) {
-				gap = this.inventory.gaps[ i ];
-
-				gap.$first_el.addClass( 'inject-point' );
-			}
 		}//end else
 	};
 
 	go_content_widgets.inject_item = function( item ) {
 		var $element = null;
 
-		for ( var i in this.inventory.gaps ) {
+		for ( var i = 0, length = this.inventory.gaps.length; i < length; i++ ) {
 			var gap = this.inventory.gaps[ i ];
 			if ( gap.height > item.height ) {
 				$element = gap.$first_el;
@@ -422,102 +308,16 @@ if ( 'undefined' === typeof go_content_widgets ) {
 		}//end for
 
 		if ( ! $element ) {
-			//console.info( 'Failed to inject ' + item.name );
+			// Failed to inject
 			return false;
 		}// end if
 
-		//console.info( 'successfully injected ' + item.name + ' into a ' + $element[0].outerHTML );
-
-		var injected = $element.before( item.$el );
-
-		$( document ).trigger( 'gigaom-layout-test-injected', {
-			injected: item
-		} );
-
-		return injected;
-	};
-
-	go_content_widgets.get_tag_ref = function( $el ) {
-		var ref = $el.prop( 'tagName' ).toLowerCase();
-
-		var id = $el.attr( 'id' );
-		if ( id ) {
-			ref += '#' + id;
-		}//end if
-
-		var classes = $el.attr( 'class' );
-		if ( classes ) {
-			ref += '.' + classes.replace(/ /g, '.' );
-		}//end if
-
-		return ref;
-	};
-
-	go_content_widgets.get_element_type = function( $el ) {
-		var alignment;
-		var id;
-		var tagname;
-		var classes;
-
-		if ( $el.is( '.pullquote' ) ) {
-			return 'pullquote';
-		}//end if
-
-		id = $el.attr( 'id' );
-
-		if ( id && id.match( /attachment_/g ) ) {
-			alignment = '';
-			if ( $el.is( '.aligncenter' ) ) {
-				alignment = 'centered';
-			}//end if
-			else if ( $el.is( '.alignleft' ) ) {
-				alignment = 'left';
-			}//end else if
-			else if ( $el.is( '.alignright' ) ) {
-				alignment = 'right';
-			}//end else if
-			return 'attachment ' + alignment;
-		}//end if
-
-		if ( $el.is( '.layout-box-insert' ) ) {
-			return id;
-		}//end if
-
-		tagname = $el.prop( 'tagName' ).toLowerCase();
-		if ( tagname.match( /^h[0-9]$/ ) ) {
-			return 'heading';
-		}//end if
-
-		if ( 'iframe' === tagname ) {
-			return 'iframe';
-		}//end if
-		if ( 'blockquote' === tagname ) {
-			return 'blockquote';
-		}//end if
-		if ( 'img' === tagname ) {
-			alignment = '';
-			if ( $el.is( '.aligncenter' ) ) {
-				alignment = 'centered';
-			}//end if
-			else if ( $el.is( '.alignleft' ) ) {
-				alignment = 'left';
-			}//end else if
-			else if ( $el.is( '.alignright' ) ) {
-				alignment = 'right';
-			}//end else if
-
-			return 'image ' + alignment;
-		}//end if
-
-		classes = '.' + $el.prop( 'class' ).replace( / /g, '.' );
-		if ( classes.match( /\.embed-/g ) ) {
-			return 'embed';
-		}//end if
-
-		return go_content_widgets.get_tag_ref( $el );
+		$element.before( item.$el );
 	};
 
 	$( function() {
+		var d = new Date();
+		console.log( d, d.getMilliseconds() );
 		// If we call the init function outright, SOMETHING is causing the calculation to fail miserably. We believe it is a repaint problem
 		// but we're not sure. setTimeout's lowest value is 4ms, but we're pretending it is 1ms.
 		setTimeout( function() {
