@@ -35,12 +35,6 @@ class GO_Content_Widgets
 
 		// @todo this should only happen on `is_single`, but it was giving me trouble so I I'm moving on...
 		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) );
-
-		$data = array(
-			'layout_preferences' => get_option( $this->id_base . '-layout-preferences' ),
-		);
-		// @TODO: tie this to the front-end go-content-widgets JS rather than jquery
-		wp_localize_script( 'jquery', 'go_content_stats', $data );
 	}//end init
 
 	/**
@@ -77,6 +71,11 @@ class GO_Content_Widgets
 
 	public function wp_enqueue_scripts()
 	{
+		$data = array(
+			'layout_preferences' => $this->layout_preferences(),
+		);
+		wp_localize_script( $this->id_base, 'go_content_widgets', $data );
+
 		wp_enqueue_script( $this->id_base );
 	}//end wp_enqueue_scripts
 

@@ -1,24 +1,30 @@
-var go_content_widgets = {
-	insert: [],
-	inventory: {
-		p: [],
-		blackouts: [],
-		gaps: [],
-		spaces: []
-	},
-	layout_strategy: {},
-	non_blockers: [ 'blockquote', 'h1,h2,h3,h4,h5,h6' ]
-};
+if ( 'undefined' === typeof go_content_widgets ) {
+	var go_content_widgets = {
+		layout_preferences: {}
+	};
+}//end id
 
 (function( $ ) {
 	'use strict';
 
 	go_content_widgets.init = function( auto_inject ) {
+		this.insert = [];
+		this.inventory = {
+			p: [],
+			blackouts: [],
+			gaps: [],
+			spaces: []
+		};
+		this.non_blockers = [
+			'blockquote',
+			'h1,h2,h3,h4,h5,h6'
+		];
+
 		this.$body = $( '.post section.body.entry-content' );
 		this.$content = this.$body.find( '> div' );
 		this.$alignleft = this.$content.find( '.alignleft' );
 		this.$alignright = this.$content.find( '.alignright' );
-		this.$widgets = $( '#sidebar > div' );
+		this.$widgets = $( '#hidden-sidebar > div' );
 
 		// @TODO: the following CSS rules should be ported to the base theme
 		this.$body.css( 'overflow', 'visible' );
@@ -30,17 +36,38 @@ var go_content_widgets = {
 
 		$( 'body' ).addClass( 'go-content-widgets' );
 
+		$( '#body > .main > .go-full-post .entry-content img' ).each( function() {
+			var $img = $( this );
+
+			if ( $img.attr( 'width' ) < $img.closest( '.entry-content' ).width() ) {
+				$img.css( 'height', $img.attr( 'height' ) + 'px' );
+			} else {
+				$img.css( 'height', 'auto' );
+			}//end else
+		});
+
 		this.$widgets.each( function() {
-			var id = $( this ).attr( 'id' );
+			var widget_id = $( this ).attr( 'id' );
 
 			$( this ).addClass( 'layout-box-insert' ); // @todo, this may not be needed long term, but for now it makes the CSS easier
-			$( this ).addClass( 'layout-box-insert-right' );
 
-			go_content_widgets.insert.push( {
-				name: id,
+			var widget = {
+				name: widget_id,
 				$el: $( this ),
 				height: parseInt( $( this ).outerHeight( true ) * 0.9, 10 )
-			} );
+			};
+
+			if (
+				'undefined' !== typeof go_content_widgets.layout_preferences[ widget_id ]
+				&& 'any' !== go_content_widgets.layout_preferences[ widget_id ]
+			) {
+				widget.location = go_content_widgets.layout_preferences[ widget_id ];
+				$( this ).addClass( 'layout-box-insert-' + widget.location );
+			} else {
+				$( this ).addClass( 'layout-box-insert-right' );
+			}//end else
+
+			go_content_widgets.insert.push( widget );
 		} );
 
 		// @TODO: pull these from the sidebar widget area
@@ -76,7 +103,7 @@ var go_content_widgets = {
 			'.go-content-widgets .entry-content p {' +
 				'margin-bottom: 24px;' +
 			'}' +
-			'.go-content-widgets #sidebar {' +
+			'.go-content-widgets #hidden-sidebar {' +
 				'opacity: 0.075;' +
 				'position: absolute;' +
 				'right: 0;' +
@@ -99,11 +126,8 @@ var go_content_widgets = {
 				'text-align: center;' +
 				'top: 0;' +
 			'}' +
-			 '.layout-box-insert div {' +
+			 '.layout-box-insert > div {' +
 			 	'text-align: center;' +
-			 	'margin-top: 1em;' +
-			 	'font-size: 1.5em;' +
-			 	'color: white' +
 			 '}' +
 			'.layout-box-insert {' +
 				'margin-bottom: 1rem;' +
@@ -485,6 +509,10 @@ var go_content_widgets = {
 	};
 
 	$( function() {
-		go_content_widgets.init();
+		// If we call the init function outright, SOMETHING is causing the calculation to fail miserably. We believe it is a repaint problem
+		// but we're not sure. setTimeout's lowest value is 4ms, but we're pretending it is 1ms.
+		setTimeout( function() {
+			go_content_widgets.init();
+		}, 1 );
 	});
 })( jQuery );

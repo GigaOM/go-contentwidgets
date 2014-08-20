@@ -77,6 +77,7 @@ class GO_Content_Widgets_Admin
 		// add new/updated preferences to the widget preferences
 		foreach ( $_POST['go-content-widgets'] as $key => $preference )
 		{
+			$key = preg_replace( '/^widget(-[0-9]*)?_/', '', $key );
 			$widget_preferences[ $key ] = $preference;
 		}//end foreach
 
