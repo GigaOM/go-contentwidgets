@@ -10,7 +10,6 @@ if ( 'undefined' === typeof go_content_widgets ) {
 	go_content_widgets.init = function( auto_inject ) {
 		this.insert = [];
 		this.inventory = {
-			p: [],
 			blackouts: [],
 			gaps: [],
 			spaces: []
@@ -133,7 +132,6 @@ if ( 'undefined' === typeof go_content_widgets ) {
 	go_content_widgets.reset = function() {
 		this.$content.find( '.layout-box-thing' ).remove();
 		this.inventory = {
-			p: [],
 			blackouts: [],
 			gaps: [],
 			spaces: []
