@@ -234,13 +234,14 @@ if ( 'undefined' === typeof go_content_widgets ) {
 
 		if ( 0 === this.inventory.blackouts.length ) {
 			$overlay = this.overlay( this.$content, start, this.$content.outerHeight(), 'solo-gap' );
-			gap = this.attributes( $overlay );
+			gap = {};
 			gap.$overlay = $overlay;
 			gap.$first_el = this.$first_element;
 
 			this.inventory.gaps.push( gap );
 		}//end if
 		else {
+
 			var previous_blackout = null;
 			for ( var i = 0, length = this.inventory.blackouts.length; i < length; i++ ) {
 				var blackout = this.inventory.blackouts[ i ];
@@ -252,10 +253,10 @@ if ( 'undefined' === typeof go_content_widgets ) {
 					}//end if
 
 					$overlay = this.overlay( blackout.$overlay, start, gap_height, 'gap' );
-					gap = this.attributes( $overlay );
+					gap = {};
 
 					// if the gap height isn't tall enough for our shortest widget, don't bother looking for an injection point
-					if ( gap.height > this.shortest_widget_height ) {
+					if ( gap_height > this.shortest_widget_height ) {
 						gap.$overlay = $overlay;
 						gap.$first_el = [];
 
@@ -265,13 +266,10 @@ if ( 'undefined' === typeof go_content_widgets ) {
 						else {
 							var tmp = this.attributes( previous_blackout.$overlay.next() );
 
-							go_content_widgets.log( 'start measuring thing' );
-
 							// find an element below the blackout
 							while ( tmp.start < previous_blackout.end ) {
 								tmp = this.attributes( tmp.$el.next() );
 							}// end while
-							go_content_widgets.log( 'stop measuring thing' );
 
 							if ( tmp.start >= previous_blackout.end && tmp.end <= blackout.start ) {
 								gap.$first_el = tmp.$el;
@@ -279,7 +277,7 @@ if ( 'undefined' === typeof go_content_widgets ) {
 						}//end else
 
 						if ( gap.$first_el.length ) {
-							if ( gap.height > this.shortest_widget_height ) {
+							if ( gap_height > this.shortest_widget_height ) {
 								this.inventory.gaps.push( gap );
 							}//end if
 						}//end if
@@ -291,11 +289,12 @@ if ( 'undefined' === typeof go_content_widgets ) {
 			}//end for
 
 			if ( previous_blackout.end < this.$content.outerHeight() ) {
+				gap_height = this.$content.outerHeight() - previous_blackout.end;
 				// find the last gap below the final blackout
 				$overlay = this.overlay( previous_blackout.$overlay, start, ( this.$content.outerHeight() - start ), 'last-gap' );
-				gap = this.attributes( $overlay );
+				gap = {};
 				// if the gap height isn't tall enough for our shortest widget, don't bother doing more stuff with it
-				if ( gap.height > this.shortest_widget_height ) {
+				if ( gap_height > this.shortest_widget_height ) {
 					gap.$overlay = $overlay;
 					gap.$first_el = gap.$overlay.next();
 
@@ -318,7 +317,9 @@ if ( 'undefined' === typeof go_content_widgets ) {
 		var $element = null;
 
 		for ( var i = 0, length = this.inventory.gaps.length; i < length; i++ ) {
-			var gap = this.inventory.gaps[ i ];
+			var gap = this.attributes( this.inventory.gaps[ i ].$overlay );
+			gap.$overlay = this.inventory.gaps[ i ].$overlay;
+			gap.$first_el = this.inventory.gaps[ i ].$first_el;
 			if ( gap.height > item.height ) {
 				$element = gap.$first_el;
 
