@@ -121,7 +121,7 @@ if ( 'undefined' === typeof go_content_widgets ) {
 
 		margin_top = parseInt( margin_top.replace( 'px', '' ), 10 );
 
-		var top = parseInt( $el.position().top, 10 );
+		var top = $el.get( 0 ).offsetTop;
 		var height = parseInt( $el.outerHeight( true ), 10 );
 		top -= margin_top;
 		var end = top + height;
@@ -137,8 +137,8 @@ if ( 'undefined' === typeof go_content_widgets ) {
 	};
 
 	go_content_widgets.overlay = function( $el, start, height, type ) {
-		// for a lot of concatenations like this one, join is faster: http://moduscreate.com/javascript-performance-tips-tricks/
-		var $overlay = $( [ '<div class="layout-box-thing ', type, '" style="top:', start, 'px;height:', height, 'px;"></div>' ].join() );
+		var $overlay = $( '<div class="layout-box-thing" style="top:' + start + 'px;height:' + height + 'px;"></div>' );
+
 		if ( 'gap' === type ) {
 			$el.before( $overlay );
 		} else if( 'solo-gap' === type ) {
@@ -300,12 +300,12 @@ if ( 'undefined' === typeof go_content_widgets ) {
 
 					// check that the element we found is below the blackout
 					// @note: slight fear that this could cause an infinite loop
-					while ( gap.$first_el.length && gap.$first_el.position() && gap.$first_el.position().top < previous_blackout.end ) {
+					while ( gap.$first_el.length && gap.$first_el.get( 0 ).offsetTop && gap.$first_el.get( 0 ).offsetTop < previous_blackout.end ) {
 						gap.$first_el = gap.$first_el.next();
 					}// end while
 
 					// make sure the gap has an element in it, if not, it can't be counted
-					if ( gap.$first_el.length && gap.$first_el.position() ) {
+					if ( gap.$first_el.length && gap.$first_el.get( 0 ).offsetTop ) {
 						this.inventory.gaps.push( gap );
 					}//end if
 				}//end if
