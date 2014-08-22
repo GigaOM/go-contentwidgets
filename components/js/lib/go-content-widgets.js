@@ -25,14 +25,10 @@ if ( 'undefined' === typeof go_content_widgets ) {
 			blackouts: [],
 			gaps: []
 		};
-		this.non_blockers = [
-			'blockquote',
-			'h1,h2,h3,h4,h5,h6'
-		];
 
 		this.$body = $( '#body' ).find( '.post section.body.entry-content' );
 		this.$content = this.$body.find( '> div' );
-		this.$widgets = $( '#hidden-sidebar > div' );
+
 		this.$first_element = this.$content.find( ':first' );
 		this.$images = this.$content.find( 'img' );
 
@@ -46,7 +42,18 @@ if ( 'undefined' === typeof go_content_widgets ) {
 			}//end else
 		});
 
+		this.collect_widgets();
+
+		this.auto_inject();
+		this.$content.find( '.layout-box-thing' ).remove();
+		$( '#body' ).addClass( 'rendered' );
+		go_content_widgets.current = Date.now();
+		console.info( 'Took this long:', go_content_widgets.current - go_content_widgets.start );
+	};
+
+	go_content_widgets.collect_widgets = function() {
 		go_content_widgets.log( 'collecting widgets' );
+		this.$widgets = $( '#hidden-sidebar > div' );
 		this.$widgets.each( function() {
 			var $widget = $( this );
 			var widget_id = $widget.attr( 'id' );
@@ -92,13 +99,7 @@ if ( 'undefined' === typeof go_content_widgets ) {
 			go_content_widgets.insert.push( widget );
 		} );
 		go_content_widgets.log( 'finished collecting widgets' );
-
-		this.auto_inject();
-		this.$content.find( '.layout-box-thing' ).remove();
-		$( '#body' ).addClass( 'rendered' );
-		go_content_widgets.current = Date.now();
-		console.info( 'Took this long:', go_content_widgets.current - go_content_widgets.start );
-	};
+	}
 
 	/**
 	 * auto injects items in order
@@ -159,58 +160,34 @@ if ( 'undefined' === typeof go_content_widgets ) {
 	};
 
 	go_content_widgets.calc = function() {
+		go_content_widgets.log( 'begin calc and reset' );
 		this.reset();
-		go_content_widgets.log( 'begin identify blackouts' );
+		go_content_widgets.log( 'end reset/begin identify blackouts' );
 		this.identify_blackouts();
 		go_content_widgets.log( 'end identify blackouts/begin identify gaps' );
 		this.identify_gaps();
-		go_content_widgets.log( 'end identify gaps' );
+		go_content_widgets.log( 'end identify gaps and calc' );
 	};
 
 	go_content_widgets.identify_blackouts = function() {
 		go_content_widgets.log( 'before find :visible' );
 		// find top level blackouts
-		this.$content.find( '> *:visible:not(p):not(ol):not(ul):not(script):not(address)' ).each( function() {
+		// since :visible isn't native CSS, following the jQuery recommendation of running it after a pure CSS selector
+		this.$content.find( '> *:not(p,blockquote,h1,h2,h3,h4,h5,h6,ol,ul,script,address)' ).filter( ':visible' ).each( function() {
 			var $el = $( this );
-
-			for ( var i = 0, length = go_content_widgets.non_blockers.length; i < length; i++ ) {
-				if ( $el.is( go_content_widgets.non_blockers[ i ] ) ) {
-					return;
-				}//end if
-			}//end for
-
-			var attr = go_content_widgets.attributes( $el );
-			attr.is_child = false;
-			go_content_widgets.inventory.blackouts.push( attr );
+			$el.is_child = false;
+			go_content_widgets.inventory.blackouts.push( $el );
 		});
 
 		go_content_widgets.log( 'after find :visible / before find children' );
 		// find child blackouts
-		this.$content.find( '> p *' ).each( function() {
+		this.$content.find( '> p *' ).filter( 'img,iframe,.layout-box-insert' ).each( function() {
 			var $el = $( this );
-			if ( ! $el.is( 'img' ) && ! $el.is( 'iframe' ) && ! $el.is( '.layout-box-insert' ) ) {
-				return;
-			}//end if
-
-			var attr = go_content_widgets.attributes( $el );
-			attr.is_child = true;
-			go_content_widgets.inventory.blackouts.push( attr );
+			$el.is_child = true;
+			go_content_widgets.inventory.blackouts.push( $el );
 		});
 
 		go_content_widgets.log( 'after find children / before blackout overlay generation' );
-
-		// draw the blackout overlays
-		for ( var i = 0, length = this.inventory.blackouts.length; i < length; i++ ) {
-			var blackout = this.inventory.blackouts[ i ];
-
-			if ( blackout.is_child ) {
-				blackout.$overlay = this.overlay( blackout.$el.closest( 'p' ), blackout.start, blackout.height, 'blackout' );
-			}// end if
-			else {
-				blackout.$overlay = this.overlay( blackout.$el, blackout.start, blackout.height, 'blackout' );
-			}// end else
-		}//end for
-		go_content_widgets.log( 'after blackout overlay generation' );
 
 		this.inventory.blackouts.sort( this.sort_by_start );
 	};
@@ -233,9 +210,8 @@ if ( 'undefined' === typeof go_content_widgets ) {
 		var length;
 
 		if ( 0 === this.inventory.blackouts.length ) {
-			$overlay = this.overlay( this.$content, start, this.$content.outerHeight(), 'solo-gap' );
 			gap = {};
-			gap.$overlay = $overlay;
+			gap.$overlay = this.overlay( this.$content, start, this.$content.outerHeight(), 'solo-gap' );;
 			gap.$first_el = this.$first_element;
 
 			this.inventory.gaps.push( gap );
@@ -244,43 +220,41 @@ if ( 'undefined' === typeof go_content_widgets ) {
 
 			var previous_blackout = null;
 			for ( i = 0, length = this.inventory.blackouts.length; i < length; i++ ) {
-				var blackout = this.inventory.blackouts[ i ];
+				var blackout = this.attributes( this.inventory.blackouts[ i ] );
+				if ( blackout.$el.is_child ) {
+					blackout.$el = blackout.$el.closest( 'p' );
+				}// end if
 
 				if ( blackout.start > start ) {
 					gap_height = blackout.start - start;
-					if ( 0 === gap_height ) {
+
+					// if the gap height isn't tall enough for our shortest widget, don't bother with it
+					if ( 0 === gap_height || gap_height < this.shortest_widget_height ) {
 						continue;
 					}//end if
 
-					$overlay = this.overlay( blackout.$overlay, start, gap_height, 'gap' );
 					gap = {};
+					gap.$overlay = this.overlay( blackout.$el, start, gap_height, 'gap' );
+					gap.$first_el = [];
 
-					// if the gap height isn't tall enough for our shortest widget, don't bother looking for an injection point
-					if ( gap_height > this.shortest_widget_height ) {
-						gap.$overlay = $overlay;
-						gap.$first_el = [];
+					if ( 0 === start ) {
+						gap.$first_el = this.$first_element;
+					}//end if
+					else {
+						var tmp = this.attributes( previous_blackout.$el.next() );
 
-						if ( 0 === start ) {
-							gap.$first_el = this.$first_element;
+						// find an element below the blackout
+						while ( tmp.start < previous_blackout.end ) {
+							tmp = this.attributes( tmp.$el.next() );
+						}// end while
+
+						if ( tmp.start >= previous_blackout.end && tmp.end <= blackout.start ) {
+							gap.$first_el = tmp.$el;
 						}//end if
-						else {
-							var tmp = this.attributes( previous_blackout.$overlay.next() );
+					}//end else
 
-							// find an element below the blackout
-							while ( tmp.start < previous_blackout.end ) {
-								tmp = this.attributes( tmp.$el.next() );
-							}// end while
-
-							if ( tmp.start >= previous_blackout.end && tmp.end <= blackout.start ) {
-								gap.$first_el = tmp.$el;
-							}//end if
-						}//end else
-
-						if ( gap.$first_el.length ) {
-							if ( gap_height > this.shortest_widget_height ) {
-								this.inventory.gaps.push( gap );
-							}//end if
-						}//end if
+					if ( gap.$first_el.length ) {
+						this.inventory.gaps.push( gap );
 					}//end if
 				}//end if
 
@@ -291,11 +265,11 @@ if ( 'undefined' === typeof go_content_widgets ) {
 			if ( previous_blackout.end < this.$content.outerHeight() ) {
 				gap_height = this.$content.outerHeight() - previous_blackout.end;
 				// find the last gap below the final blackout
-				$overlay = this.overlay( previous_blackout.$overlay, start, ( this.$content.outerHeight() - start ), 'last-gap' );
-				gap = {};
+
 				// if the gap height isn't tall enough for our shortest widget, don't bother doing more stuff with it
 				if ( gap_height > this.shortest_widget_height ) {
-					gap.$overlay = $overlay;
+					gap = {};
+					gap.$overlay = this.overlay( previous_blackout.$el, start, ( this.$content.outerHeight() - start ), 'last-gap' );;
 					gap.$first_el = gap.$overlay.next();
 
 					// check that the element we found is below the blackout
@@ -315,6 +289,7 @@ if ( 'undefined' === typeof go_content_widgets ) {
 
 	go_content_widgets.inject_item = function( item ) {
 		var $element = null;
+		go_content_widgets.log( 'injecting item' );
 
 		for ( var i = 0, length = this.inventory.gaps.length; i < length; i++ ) {
 			var gap = this.attributes( this.inventory.gaps[ i ].$overlay );
@@ -344,6 +319,7 @@ if ( 'undefined' === typeof go_content_widgets ) {
 		}// end if
 
 		$element.before( item.$el );
+		go_content_widgets.log( 'end injecting item' );
 	};
 
 	$( function() {
