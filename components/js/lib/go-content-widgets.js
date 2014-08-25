@@ -7,6 +7,11 @@ if ( 'undefined' === typeof go_content_widgets ) {
 (function( $ ) {
 	'use strict';
 
+	// compatibility with bcms wijax widgets
+	$( document ).on( 'wijax-loaded', function( event, widget_id ) {
+		go_content_widgets.single_widget_inject( $( '#' + widget_id ) );
+	} );
+
 	go_content_widgets.last = Date.now();
 	go_content_widgets.current = Date.now();
 
@@ -18,6 +23,7 @@ if ( 'undefined' === typeof go_content_widgets ) {
 
 	go_content_widgets.init = function() {
 		go_content_widgets.log( 'begin init' );
+		this.loading = true;
 		this.shortest_widget_height = 10000;
 		this.tallest_widget_height = 0;
 		this.insert = [];
@@ -51,56 +57,110 @@ if ( 'undefined' === typeof go_content_widgets ) {
 		console.info( 'Took this long:', go_content_widgets.current - go_content_widgets.start );
 
 		$( document ).trigger( 'go-content-widgets-complete' );
+		this.loading = false;
 	};
 
 	go_content_widgets.collect_widgets = function() {
 		go_content_widgets.log( 'collecting widgets' );
-		this.$widgets = $( '#hidden-sidebar > div' );
+		this.$widgets = $( '#hidden-sidebar > div:not(.widget_wijax)' );
 		this.$widgets.each( function() {
-			var $widget = $( this );
-			var widget_id = $widget.attr( 'id' );
-
-			$widget.addClass( 'layout-box-insert' ); // @todo, this may not be needed long term, but for now it makes the CSS easier
-
-			var widget = {
-				name: widget_id,
-				$el: $widget,
-				height: parseInt( $widget.outerHeight( true ) * 0.9, 10 ),
-				location: 'right',
-				preferbottom: false
-			};
-
-			if ( widget.height < go_content_widgets.shortest_widget_height ) {
-				go_content_widgets.shortest_widget_height = widget.height;
-			}//end if
-
-			if ( widget.height > go_content_widgets.tallest_widget_height ) {
-				go_content_widgets.tallest_widget_height = widget.height;
-			}//end if
-
-			if ( 'undefined' !== typeof go_content_widgets.layout_preferences[ widget_id ] ) {
-				if (
-					'undefined' !== typeof go_content_widgets.layout_preferences[ widget_id ].direction
-					&& 'bottom' === go_content_widgets.layout_preferences[ widget_id ].direction
-				) {
-					widget.preferbottom = true;
-				}//end if
-
-				if (
-					'undefined' !== typeof go_content_widgets.layout_preferences[ widget_id ].location
-					&& 'any' !== go_content_widgets.layout_preferences[ widget_id ].location
-				) {
-					widget.location = go_content_widgets.layout_preferences[ widget_id ].location;
-				}//end if
-			}//end if
-
-			if ( widget.location ) {
-				$widget.addClass( 'layout-box-insert-'.concat( widget.location ) );
-			}//end if
-
-			go_content_widgets.insert.push( widget );
+			go_content_widgets.add_widget( $( this ) );
 		} );
 		go_content_widgets.log( 'finished collecting widgets' );
+	};
+
+	go_content_widgets.add_widget = function( $widget ) {
+		var widget_id = $widget.attr( 'id' );
+
+		$widget.addClass( 'layout-box-insert' ); // @todo, this may not be needed long term, but for now it makes the CSS easier
+
+		var widget = {
+			name: widget_id,
+			$el: $widget,
+			height: parseInt( $widget.outerHeight( true ) * 0.9, 10 ),
+			location: 'right',
+			preferbottom: false
+		};
+
+		if ( widget.height < this.shortest_widget_height ) {
+			this.shortest_widget_height = widget.height;
+		}//end if
+
+		if ( widget.height > this.tallest_widget_height ) {
+			this.tallest_widget_height = widget.height;
+		}//end if
+
+		if ( 'undefined' !== typeof this.layout_preferences[ widget_id ] ) {
+			if (
+				'undefined' !== typeof this.layout_preferences[ widget_id ].direction
+				&& 'bottom' === this.layout_preferences[ widget_id ].direction
+			) {
+				widget.preferbottom = true;
+			}//end if
+
+			if (
+				'undefined' !== typeof this.layout_preferences[ widget_id ].location
+				&& 'any' !== this.layout_preferences[ widget_id ].location
+			) {
+				widget.location = this.layout_preferences[ widget_id ].location;
+			}//end if
+		}//end if
+
+		if ( widget.location ) {
+			$widget.addClass( 'layout-box-insert-'.concat( widget.location ) );
+		}//end if
+
+		this.insert.push( widget );
+		return( widget );
+	};
+
+	go_content_widgets.single_widget_inject = function( $widget ) {
+		if ( this.loading ) {
+			// sleep here and try again since other injections are actively happening.
+			setTimeout( function() {
+				go_content_widgets.single_widget_inject( $widget );
+			}, 10 );
+		}//end if
+
+		this.loading = true;
+
+		this.reset();
+
+		// identify all the normal blackouts and gaps
+		this.identify_blackouts();
+
+		// blackout everything from the bottom of the current viewport and up!
+		var scroll_bottom = $( window ).scrollTop() + $( window ).height();
+		var content_scroll_top = this.$content.offset().top;
+
+		var end = scroll_bottom - content_scroll_top;
+
+		var blackout = {
+			$el: this.$first_element,
+			start: 0,
+			end: end,
+			height: end
+		};
+
+		var new_blackouts = [ blackout ];
+		for ( var i in this.inventory.blackouts ) {
+			if ( this.inventory.blackouts[ i ].end > blackout.end ) {
+				 new_blackouts.push( this.inventory.blackouts[ i ] );
+
+				 if ( blackout.end > this.inventory.blackouts[ i ].start ) {
+					blackout.end = this.inventory.blackouts[ i ].start;
+					blackout.height = blackout.end;
+				}//end if
+			}
+		}//end for
+		this.inventory.blackouts = new_blackouts;
+
+		this.identify_gaps();
+
+		var injectable = this.add_widget( $widget );
+		this.inject_item( injectable );
+
+		this.loading = false;
 	};
 
 	/**
@@ -272,7 +332,7 @@ if ( 'undefined' === typeof go_content_widgets ) {
 				previous_blackout = blackout;
 			}//end for
 
-			if ( previous_blackout.end < this.$content.outerHeight() ) {
+			if ( previous_blackout && previous_blackout.end < this.$content.outerHeight() ) {
 				gap_height = this.$content.outerHeight() - previous_blackout.end;
 				// find the last gap below the final blackout
 
@@ -312,7 +372,6 @@ if ( 'undefined' === typeof go_content_widgets ) {
 					// find the last element in the gap where item will fit
 					var next_element = this.attributes( $element );
 					while ( next_element.end <= gap.end && ( gap.end - next_element.start ) > item.height ) {
-						//console.info( next_element.end + "<=" + gap.end + " && ( " + gap.end + " - " + next_element.start + " ) > " + item.height );
 						$element = next_element.$el;
 						next_element = this.attributes( $element.next() );
 					}// end while
