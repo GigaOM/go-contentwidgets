@@ -9,7 +9,10 @@ if ( 'undefined' === typeof go_content_widgets ) {
 
 	// compatibility with bcms wijax widgets
 	$( document ).on( 'wijax-loaded', function( event, widget_id ) {
-		go_content_widgets.single_widget_inject( $( '#' + widget_id ) );
+		var $widget = $( '#' + widget_id );
+		if ( $widget.closest( '#hidden-sidebar' ).length > 0 ) {
+			go_content_widgets.single_widget_inject( $widget );
+		}//end if
 	} );
 
 	go_content_widgets.last = Date.now();
