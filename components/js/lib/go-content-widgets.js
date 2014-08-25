@@ -99,7 +99,7 @@ if ( 'undefined' === typeof go_content_widgets ) {
 			go_content_widgets.insert.push( widget );
 		} );
 		go_content_widgets.log( 'finished collecting widgets' );
-	}
+	};
 
 	/**
 	 * auto injects items in order
@@ -175,16 +175,18 @@ if ( 'undefined' === typeof go_content_widgets ) {
 		// since :visible isn't native CSS, following the jQuery recommendation of running it after a pure CSS selector
 		this.$content.find( '> *:not(p,blockquote,h1,h2,h3,h4,h5,h6,ol,ul,script,address)' ).filter( ':visible' ).each( function() {
 			var $el = $( this );
-			$el.is_child = false;
-			go_content_widgets.inventory.blackouts.push( $el );
+			var attr = go_content_widgets.attributes( $el );
+			go_content_widgets.inventory.blackouts.push( attr );
 		});
 
 		go_content_widgets.log( 'after find :visible / before find children' );
 		// find child blackouts
 		this.$content.find( '> p *' ).filter( 'img,iframe,.layout-box-insert' ).each( function() {
 			var $el = $( this );
-			$el.is_child = true;
-			go_content_widgets.inventory.blackouts.push( $el );
+			var attr = go_content_widgets.attributes( $el );
+			// since this is a child, after we've calculated the blackout grab its parent p
+			attr.$el = $el.closest( 'p' );
+			go_content_widgets.inventory.blackouts.push( attr );
 		});
 
 		go_content_widgets.log( 'after find children / before blackout overlay generation' );
@@ -204,32 +206,29 @@ if ( 'undefined' === typeof go_content_widgets ) {
 	go_content_widgets.identify_gaps = function() {
 		var start = 0;
 		var gap;
-		var $overlay;
 		var i;
 		var gap_height;
 		var length;
 
 		if ( 0 === this.inventory.blackouts.length ) {
 			gap = {};
-			gap.$overlay = this.overlay( this.$content, start, this.$content.outerHeight(), 'solo-gap' );;
+			gap.$overlay = this.overlay( this.$content, start, this.$content.outerHeight(), 'solo-gap' );
 			gap.$first_el = this.$first_element;
 
 			this.inventory.gaps.push( gap );
 		}//end if
 		else {
-
 			var previous_blackout = null;
 			for ( i = 0, length = this.inventory.blackouts.length; i < length; i++ ) {
-				var blackout = this.attributes( this.inventory.blackouts[ i ] );
-				if ( blackout.$el.is_child ) {
-					blackout.$el = blackout.$el.closest( 'p' );
-				}// end if
+				var blackout = this.inventory.blackouts[ i ];
 
 				if ( blackout.start > start ) {
 					gap_height = blackout.start - start;
 
 					// if the gap height isn't tall enough for our shortest widget, don't bother with it
 					if ( 0 === gap_height || gap_height < this.shortest_widget_height ) {
+						start = blackout.end;
+						previous_blackout = blackout;
 						continue;
 					}//end if
 
@@ -238,14 +237,23 @@ if ( 'undefined' === typeof go_content_widgets ) {
 					gap.$first_el = [];
 
 					if ( 0 === start ) {
-						gap.$first_el = this.$first_element;
+						var tmp = this.attributes( this.$first_element );
+
+						if ( tmp.end <= blackout.start ) {
+							gap.$first_el = this.$first_element;
+						}//end if
 					}//end if
 					else {
 						var tmp = this.attributes( previous_blackout.$el.next() );
 
 						// find an element below the blackout
 						while ( tmp.start < previous_blackout.end ) {
-							tmp = this.attributes( tmp.$el.next() );
+							tmp.$el = tmp.$el.next();
+							if ( tmp.$el.is( '.layout-box-thing' ) ) {
+								continue;
+							}//end if
+
+							tmp = this.attributes( tmp.$el );
 						}// end while
 
 						if ( tmp.start >= previous_blackout.end && tmp.end <= blackout.start ) {
@@ -269,7 +277,7 @@ if ( 'undefined' === typeof go_content_widgets ) {
 				// if the gap height isn't tall enough for our shortest widget, don't bother doing more stuff with it
 				if ( gap_height > this.shortest_widget_height ) {
 					gap = {};
-					gap.$overlay = this.overlay( previous_blackout.$el, start, ( this.$content.outerHeight() - start ), 'last-gap' );;
+					gap.$overlay = this.overlay( previous_blackout.$el, start, ( this.$content.outerHeight() - start ), 'last-gap' );
 					gap.$first_el = gap.$overlay.next();
 
 					// check that the element we found is below the blackout
