@@ -49,6 +49,8 @@ if ( 'undefined' === typeof go_content_widgets ) {
 		$( '#body' ).addClass( 'rendered' );
 		go_content_widgets.current = Date.now();
 		console.info( 'Took this long:', go_content_widgets.current - go_content_widgets.start );
+
+		$( document ).trigger( 'go-content-widgets-complete' );
 	};
 
 	go_content_widgets.collect_widgets = function() {
