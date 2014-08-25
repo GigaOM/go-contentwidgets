@@ -58,6 +58,15 @@ if ( 'undefined' === typeof go_content_widgets ) {
 
 		$( document ).trigger( 'go-content-widgets-complete' );
 		this.loading = false;
+
+		// watch for resizes and re-inject all the things
+		$( document ).on( 'go-resize', function() {
+			go_content_widgets.$widgets.each( function() {
+				$( '#hidden-sidebar' ).append( $( this ) );
+			});
+
+			go_content_widgets.auto_inject();
+		});
 	};
 
 	go_content_widgets.collect_widgets = function() {
