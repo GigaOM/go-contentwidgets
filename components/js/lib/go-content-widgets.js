@@ -12,7 +12,7 @@ if ( 'undefined' === typeof go_content_widgets ) {
 
 	go_content_widgets.log = function( text ) {
 		go_content_widgets.current = Date.now();
-		console.info( text, go_content_widgets.current - go_content_widgets.last );
+		//console.info( text, go_content_widgets.current - go_content_widgets.last );
 		go_content_widgets.last = go_content_widgets.current;
 	};
 
