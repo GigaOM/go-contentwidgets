@@ -1,6 +1,6 @@
 <?php
 
-class GO_Content_Widgets_Admin
+class GO_ContentWidgets_Admin
 {
 	/**
 	 * constructor
@@ -17,10 +17,10 @@ class GO_Content_Widgets_Admin
 	private function register_resources()
 	{
 		wp_register_script(
-			go_content_widgets()->id_base . '-admin',
-			plugins_url( 'js/lib/go-content-widgets-admin.js', __FILE__ ),
+			go_contentwidgets()->id_base . '-admin',
+			plugins_url( 'js/lib/go-contentwidgets-admin.js', __FILE__ ),
 			array( 'jquery' ),
-			go_content_widgets()->script_config( 'version' ),
+			go_contentwidgets()->script_config( 'version' ),
 			TRUE
 		);
 	}//end register_resources
@@ -47,23 +47,23 @@ class GO_Content_Widgets_Admin
 	{
 		$data = array(
 			'sidebar_id' => 'gigaom-single-sidebar',
-			'layout_preferences' => get_option( go_content_widgets()->id_base . '-layout-preferences' ),
+			'layout_preferences' => get_option( go_contentwidgets()->id_base . '-layout-preferences' ),
 		);
 
-		wp_localize_script( go_content_widgets()->id_base . '-admin', 'go_content_widgets_admin', $data );
-		wp_enqueue_script( go_content_widgets()->id_base . '-admin' );
+		wp_localize_script( go_contentwidgets()->id_base . '-admin', 'go_contentwidgets_admin', $data );
+		wp_enqueue_script( go_contentwidgets()->id_base . '-admin' );
 	}//end admin_enqueue_scripts
 
 	/**
-	 * hook to sidebar_admin_setup to capture go-content-widgets vars posted to the ajax end point
+	 * hook to sidebar_admin_setup to capture go-contentwidgets vars posted to the ajax end point
 	 */
 	public function sidebar_admin_setup()
 	{
 		global $sidebars_widgets;
 
 		if (
-			empty( $_POST['go-content-widgets'] )
-			|| ! is_array( $_POST['go-content-widgets'] )
+			empty( $_POST['go-contentwidgets'] )
+			|| ! is_array( $_POST['go-contentwidgets'] )
 			|| empty( $_POST['sidebar'] )
 		)
 		{
@@ -72,10 +72,10 @@ class GO_Content_Widgets_Admin
 
 		$sidebar = $_POST['sidebar'];
 
-		$widget_preferences = go_content_widgets()->layout_preferences();
+		$widget_preferences = go_contentwidgets()->layout_preferences();
 
 		// add new/updated preferences to the widget preferences
-		foreach ( $_POST['go-content-widgets'] as $key => $preference )
+		foreach ( $_POST['go-contentwidgets'] as $key => $preference )
 		{
 			$key = preg_replace( '/^widget(-[0-9]*)?_/', '', $key );
 			$widget_preferences[ $key ] = $preference;
@@ -85,14 +85,14 @@ class GO_Content_Widgets_Admin
 		// get rid of elements that don't exist in the sidebar anymore
 		foreach ( $widget_preferences as $widget => $preference )
 		{
-			if ( ! in_array( $widget, $sidebars_widgets[ $sidebar ] ) && ! in_array( $widget, $_POST['go-content-widgets'] ) )
+			if ( ! in_array( $widget, $sidebars_widgets[ $sidebar ] ) && ! in_array( $widget, $_POST['go-contentwidgets'] ) )
 			{
 				unset( $widget_preferences[ $widget ] );
 			}//end if
 		}//end foreach
 
-		update_option( go_content_widgets()->id_base . '-layout-preferences', $widget_preferences );
+		update_option( go_contentwidgets()->id_base . '-layout-preferences', $widget_preferences );
 
-		unset( $_POST['go-content-widgets'] );
+		unset( $_POST['go-contentwidgets'] );
 	}//end sidebar_admin_setup
 }//end class

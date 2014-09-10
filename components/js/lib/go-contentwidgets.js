@@ -1,5 +1,5 @@
-if ( 'undefined' === typeof go_content_widgets ) {
-	var go_content_widgets = {
+if ( 'undefined' === typeof go_contentwidgets ) {
+	var go_contentwidgets = {
 		layout_preferences: {}
 	};
 }//end id
@@ -11,21 +11,23 @@ if ( 'undefined' === typeof go_content_widgets ) {
 	$( document ).on( 'wijax-loaded', function( event, widget_id ) {
 		var $widget = $( '#' + widget_id );
 		if ( $widget.closest( '#hidden-sidebar' ).length > 0 ) {
-			go_content_widgets.single_widget_inject( $widget );
+			go_contentwidgets.single_widget_inject( $widget );
 		}//end if
 	} );
 
-	go_content_widgets.last = Date.now();
-	go_content_widgets.current = Date.now();
+	go_contentwidgets.last = Date.now();
+	go_contentwidgets.current = Date.now();
 
-	go_content_widgets.log = function( text ) {
-		go_content_widgets.current = Date.now();
-		//console.info( text, go_content_widgets.current - go_content_widgets.last );
-		go_content_widgets.last = go_content_widgets.current;
+	go_contentwidgets.log = function( text ) {
+		go_contentwidgets.current = Date.now();
+		//console.info( text, go_contentwidgets.current - go_contentwidgets.last );
+		go_contentwidgets.last = go_contentwidgets.current;
 	};
 
-	go_content_widgets.init = function() {
-		go_content_widgets.log( 'begin init' );
+	go_contentwidgets.init = function() {
+		go_contentwidgets.start = Date.now();
+		go_contentwidgets.last = go_contentwidgets.start;
+		go_contentwidgets.log( 'begin init' );
 		this.loading = true;
 		this.shortest_widget_height = 10000;
 		this.tallest_widget_height = 0;
@@ -56,32 +58,32 @@ if ( 'undefined' === typeof go_content_widgets ) {
 		this.auto_inject();
 		this.$content.find( '.layout-box-thing' ).remove();
 		$( '#body' ).addClass( 'rendered' );
-		go_content_widgets.current = Date.now();
-		console.info( 'Took this long:', go_content_widgets.current - go_content_widgets.start );
+		go_contentwidgets.current = Date.now();
+		console.info( 'Took this long:', go_contentwidgets.current - go_contentwidgets.start );
 
-		$( document ).trigger( 'go-content-widgets-complete' );
+		$( document ).trigger( 'go-contentwidgets-complete' );
 		this.loading = false;
 
 		// watch for resizes and re-inject all the things
 		$( document ).on( 'go-resize', function() {
-			go_content_widgets.$widgets.each( function() {
+			go_contentwidgets.$widgets.each( function() {
 				$( '#hidden-sidebar' ).append( $( this ) );
 			});
 
-			go_content_widgets.auto_inject();
+			go_contentwidgets.auto_inject();
 		});
 	};
 
-	go_content_widgets.collect_widgets = function() {
-		go_content_widgets.log( 'collecting widgets' );
+	go_contentwidgets.collect_widgets = function() {
+		go_contentwidgets.log( 'collecting widgets' );
 		this.$widgets = $( '#hidden-sidebar > div:not(.widget_wijax)' );
 		this.$widgets.each( function() {
-			go_content_widgets.add_widget( $( this ) );
+			go_contentwidgets.add_widget( $( this ) );
 		} );
-		go_content_widgets.log( 'finished collecting widgets' );
+		go_contentwidgets.log( 'finished collecting widgets' );
 	};
 
-	go_content_widgets.add_widget = function( $widget ) {
+	go_contentwidgets.add_widget = function( $widget ) {
 		var widget_id = $widget.attr( 'id' );
 
 		$widget.addClass( 'layout-box-insert' ); // @todo, this may not be needed long term, but for now it makes the CSS easier
@@ -126,11 +128,11 @@ if ( 'undefined' === typeof go_content_widgets ) {
 		return( widget );
 	};
 
-	go_content_widgets.single_widget_inject = function( $widget ) {
+	go_contentwidgets.single_widget_inject = function( $widget ) {
 		if ( this.loading ) {
 			// sleep here and try again since other injections are actively happening.
 			setTimeout( function() {
-				go_content_widgets.single_widget_inject( $widget );
+				go_contentwidgets.single_widget_inject( $widget );
 			}, 10 );
 		}//end if
 
@@ -178,10 +180,10 @@ if ( 'undefined' === typeof go_content_widgets ) {
 	/**
 	 * auto injects items in order
 	 */
-	go_content_widgets.auto_inject = function() {
-		for ( var i = 0, length = go_content_widgets.insert.length; i < length; i++ ) {
-			go_content_widgets.calc();
-			go_content_widgets.inject_item( go_content_widgets.insert[ i ] );
+	go_contentwidgets.auto_inject = function() {
+		for ( var i = 0, length = go_contentwidgets.insert.length; i < length; i++ ) {
+			go_contentwidgets.calc();
+			go_contentwidgets.inject_item( go_contentwidgets.insert[ i ] );
 		}// end foreach
 	};
 
@@ -191,7 +193,7 @@ if ( 'undefined' === typeof go_content_widgets ) {
 	 * @param $el jQuery element to measure
 	 * @return object with measurement attributes
 	 */
-	go_content_widgets.attributes = function( $el ) {
+	go_contentwidgets.attributes = function( $el ) {
 		var margin_top = $el.css( 'margin-top' );
 
 		margin_top = parseInt( margin_top.replace( 'px', '' ), 10 );
@@ -211,7 +213,7 @@ if ( 'undefined' === typeof go_content_widgets ) {
 		return data;
 	};
 
-	go_content_widgets.overlay = function( $el, start, height, type ) {
+	go_contentwidgets.overlay = function( $el, start, height, type ) {
 		var $overlay = $( '<div class="layout-box-thing" style="top:' + start + 'px;height:' + height + 'px;"></div>' );
 
 		if ( 'gap' === type ) {
@@ -225,7 +227,7 @@ if ( 'undefined' === typeof go_content_widgets ) {
 		return $overlay;
 	};
 
-	go_content_widgets.reset = function() {
+	go_contentwidgets.reset = function() {
 		this.$content.find( '.layout-box-thing' ).remove();
 		this.inventory = {
 			blackouts: [],
@@ -233,37 +235,37 @@ if ( 'undefined' === typeof go_content_widgets ) {
 		};
 	};
 
-	go_content_widgets.calc = function() {
-		go_content_widgets.log( 'begin calc and reset' );
+	go_contentwidgets.calc = function() {
+		go_contentwidgets.log( 'begin calc and reset' );
 		this.reset();
-		go_content_widgets.log( 'end reset/begin identify blackouts' );
+		go_contentwidgets.log( 'end reset/begin identify blackouts' );
 		this.identify_blackouts();
-		go_content_widgets.log( 'end identify blackouts/begin identify gaps' );
+		go_contentwidgets.log( 'end identify blackouts/begin identify gaps' );
 		this.identify_gaps();
-		go_content_widgets.log( 'end identify gaps and calc' );
+		go_contentwidgets.log( 'end identify gaps and calc' );
 	};
 
-	go_content_widgets.identify_blackouts = function() {
-		go_content_widgets.log( 'before find :visible' );
+	go_contentwidgets.identify_blackouts = function() {
+		go_contentwidgets.log( 'before find :visible' );
 		// find top level blackouts
 		// since :visible isn't native CSS, following the jQuery recommendation of running it after a pure CSS selector
 		this.$content.find( '> *:not(p,blockquote,h1,h2,h3,h4,h5,h6,ol,ul,script,address)' ).filter( ':visible' ).each( function() {
 			var $el = $( this );
-			var attr = go_content_widgets.attributes( $el );
-			go_content_widgets.inventory.blackouts.push( attr );
+			var attr = go_contentwidgets.attributes( $el );
+			go_contentwidgets.inventory.blackouts.push( attr );
 		});
 
-		go_content_widgets.log( 'after find :visible / before find children' );
+		go_contentwidgets.log( 'after find :visible / before find children' );
 		// find child blackouts
 		this.$content.find( '> p *' ).filter( 'img,iframe,.layout-box-insert' ).each( function() {
 			var $el = $( this );
-			var attr = go_content_widgets.attributes( $el );
+			var attr = go_contentwidgets.attributes( $el );
 			// since this is a child, after we've calculated the blackout grab its parent p
 			attr.$el = $el.closest( 'p' );
-			go_content_widgets.inventory.blackouts.push( attr );
+			go_contentwidgets.inventory.blackouts.push( attr );
 		});
 
-		go_content_widgets.log( 'after find children / before blackout overlay generation' );
+		go_contentwidgets.log( 'after find children / before blackout overlay generation' );
 
 		this.inventory.blackouts.sort( this.sort_by_start );
 	};
@@ -271,13 +273,13 @@ if ( 'undefined' === typeof go_content_widgets ) {
 	/**
 	 * sorting function used only by identify_blackouts
 	 */
-	go_content_widgets.sort_by_start = function( a, b ) {
+	go_contentwidgets.sort_by_start = function( a, b ) {
 		var a_start = a.start;
 		var b_start = b.start;
 		return ( ( a_start < b_start ) ? -1 : ( ( a_start > b_start ) ? 1 : 0 ) );
 	};
 
-	go_content_widgets.identify_gaps = function() {
+	go_contentwidgets.identify_gaps = function() {
 		var start = 0;
 		var gap;
 		var i;
@@ -369,9 +371,9 @@ if ( 'undefined' === typeof go_content_widgets ) {
 		}//end else
 	};
 
-	go_content_widgets.inject_item = function( item ) {
+	go_contentwidgets.inject_item = function( item ) {
 		var $element = null;
-		go_content_widgets.log( 'injecting item' );
+		go_contentwidgets.log( 'injecting item' );
 
 		for ( var i = 0, length = this.inventory.gaps.length; i < length; i++ ) {
 			var gap = this.attributes( this.inventory.gaps[ i ].$overlay );
@@ -400,12 +402,10 @@ if ( 'undefined' === typeof go_content_widgets ) {
 		}// end if
 
 		$element.before( item.$el );
-		go_content_widgets.log( 'end injecting item' );
+		go_contentwidgets.log( 'end injecting item' );
 	};
 
 	$( function() {
-		go_content_widgets.start = Date.now();
-		go_content_widgets.last = go_content_widgets.start;
-		go_content_widgets.init();
+		go_contentwidgets.init();
 	});
 })( jQuery );

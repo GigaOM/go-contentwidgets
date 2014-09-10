@@ -8,5 +8,5 @@
  * Author URI: http://gigaom.com/
  */
 
-require_once __DIR__ . '/components/class-go-content-widgets.php';
-go_content_widgets();
+require_once __DIR__ . '/components/class-go-contentwidgets.php';
+go_contentwidgets();

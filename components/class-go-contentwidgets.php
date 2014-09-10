@@ -1,8 +1,8 @@
 <?php
 
-class GO_Content_Widgets
+class GO_ContentWidgets
 {
-	public $id_base = 'go-content-widgets';
+	public $id_base = 'go-contentwidgets';
 	private $admin;
 	private $script_config;
 	private $layout_preferences;
@@ -27,7 +27,7 @@ class GO_Content_Widgets
 
 		wp_register_script(
 			$this->id_base,
-			plugins_url( 'js/lib/go-content-widgets.js', __FILE__ ),
+			plugins_url( 'js/lib/go-contentwidgets.js', __FILE__ ),
 			array( 'jquery' ),
 			$this->script_config( 'version' ),
 			TRUE
@@ -62,8 +62,8 @@ class GO_Content_Widgets
 	{
 		if ( ! $this->admin )
 		{
-			require_once __DIR__ . '/class-go-content-widgets-admin.php';
-			$this->admin = new GO_Content_Widgets_Admin;
+			require_once __DIR__ . '/class-go-contentwidgets-admin.php';
+			$this->admin = new GO_ContentWidgets_Admin;
 		}//end if
 
 		return $this->admin;
@@ -74,7 +74,7 @@ class GO_Content_Widgets
 		$data = array(
 			'layout_preferences' => $this->layout_preferences(),
 		);
-		wp_localize_script( $this->id_base, 'go_content_widgets', $data );
+		wp_localize_script( $this->id_base, 'go_contentwidgets', $data );
 
 		wp_enqueue_script( $this->id_base );
 	}//end wp_enqueue_scripts
@@ -93,14 +93,14 @@ class GO_Content_Widgets
 	}//end layout_preferences
 }//end class
 
-function go_content_widgets()
+function go_contentwidgets()
 {
-	global $go_content_widgets;
+	global $go_contentwidgets;
 
-	if ( ! $go_content_widgets )
+	if ( ! $go_contentwidgets )
 	{
-		$go_content_widgets = new GO_Content_Widgets;
+		$go_contentwidgets = new GO_ContentWidgets;
 	}//end if
 
-	return $go_content_widgets;
-}//end go_content_widgets
+	return $go_contentwidgets;
+}//end go_contentwidgets
