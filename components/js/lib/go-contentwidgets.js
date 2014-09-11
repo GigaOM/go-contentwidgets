@@ -7,15 +7,6 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 (function( $ ) {
 	'use strict';
 
-	// compatibility with bcms wijax widgets
-	$( document ).on( 'wijax-loaded', function( event, widget_id ) {
-		var $widget = $( '#' + widget_id );
-		if ( $widget.closest( '#hidden-sidebar' ).length > 0 ) {
-			go_contentwidgets.single_widget_inject( $widget );
-		}//end if
-	} );
-
-	go_contentwidgets.last = Date.now();
 	go_contentwidgets.current = Date.now();
 
 	go_contentwidgets.log = function( text ) {
@@ -24,11 +15,32 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		go_contentwidgets.last = go_contentwidgets.current;
 	};
 
+	go_contentwidgets.events = function() {
+		// compatibility with bcms wijax widgets
+		$( document ).on( 'wijax-loaded', function( event, widget_id ) {
+			var $widget = $( '#' + widget_id );
+			if ( $widget.closest( '#hidden-sidebar' ).length > 0 ) {
+				go_contentwidgets.single_widget_inject( $widget );
+			}//end if
+		} );
+
+		// watch for resizes and re-inject all the things
+		$( document ).on( 'go-resize', function() {
+			go_contentwidgets.$widgets.each( function() {
+				$( '#hidden-sidebar' ).append( $( this ) );
+			});
+
+			go_contentwidgets.auto_inject();
+		});
+	}
+
 	go_contentwidgets.init = function() {
-		go_contentwidgets.start = Date.now();
-		go_contentwidgets.last = go_contentwidgets.start;
-		go_contentwidgets.log( 'begin init' );
 		this.loading = true;
+
+		this.start = Date.now();
+		this.last = this.start;
+		this.log( 'begin init' );
+
 		this.shortest_widget_height = 10000;
 		this.tallest_widget_height = 0;
 		this.insert = [];
@@ -63,15 +75,6 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 		$( document ).trigger( 'go-contentwidgets-complete' );
 		this.loading = false;
-
-		// watch for resizes and re-inject all the things
-		$( document ).on( 'go-resize', function() {
-			go_contentwidgets.$widgets.each( function() {
-				$( '#hidden-sidebar' ).append( $( this ) );
-			});
-
-			go_contentwidgets.auto_inject();
-		});
 	};
 
 	go_contentwidgets.collect_widgets = function() {
@@ -407,5 +410,6 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 	$( function() {
 		go_contentwidgets.init();
+		go_contentwidgets.events();
 	});
 })( jQuery );
