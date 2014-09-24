@@ -288,6 +288,9 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 	go_contentwidgets.adjust_down = function( $injectable, distance ) {
 		var alignment_class = 'layout-box-insert-right';
+
+		distance = Math.round( distance / 8 ) * 8;
+
 		if ( ! $injectable.hasClass( alignment_class ) ) {
 			alignment_class = 'layout-box-insert-left';
 		}//end if
