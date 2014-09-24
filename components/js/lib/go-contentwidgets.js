@@ -398,6 +398,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		var length = 0;
 		var $injection_point = null;
 		var gap = null;
+		var injection_gap = null;
 		go_contentwidgets.log( 'injecting injectable' );
 
 		for ( i = 0, length = this.inventory.gaps.length; i < length; i++ ) {
@@ -414,8 +415,10 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 						$injection_point = next_injection_point.$el;
 						next_injection_point = this.attributes( $injection_point.next() );
 					}// end while
+					injection_gap = gap;
 				}//end if
 				else {
+					injection_gap = gap;
 					break;
 				}//end else
 			}//end if
@@ -427,6 +430,24 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		}// end if
 
 		$injection_point.before( injectable.$el );
+
+		// determine if the left injection overlaps an element that should push it to the right
+		// this is not super efficient, but we will be doing this rarely, so it's probably ok?
+		if ( injectable.$el.hasClass( 'layout-box-insert-left' ) ) {
+			var injectable_attrs = this.attributes( injectable.$el );
+
+			var next_injection_point = this.attributes( $injection_point );
+			var tag;
+			while ( next_injection_point.end <= injection_gap.end && injectable_attrs.end > next_injection_point.start ) {
+				tag = next_injection_point.$el.prop( 'tagName' );
+				if ( tag === 'UL' || tag === 'LI' || tag === 'BLOCKQUOTE' ) {
+					console.info('FOUND ONE!!!!!!!!');
+					injectable.$el.removeClass( 'layout-box-insert-left' ).addClass( 'layout-box-insert-right' );
+				}//end if
+
+				next_injection_point = this.attributes( next_injection_point.$el.next() );
+			}// end while
+		}//end if
 
 		$( document ).trigger( 'go-contentwidgets-injected', {
 			injected: injectable
@@ -440,4 +461,3 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		go_contentwidgets.events();
 	});
 })( jQuery );
-
