@@ -323,7 +323,11 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 					// if the gap height isn't tall enough for our shortest widget, don't bother with it
 					if ( 0 === gap_height || gap_height < this.shortest_widget_height ) {
 						if ( previous_blackout.$el.hasClass( 'layout-box-insert' ) ) {
-							this.adjust_down( previous_blackout.$el, gap_height / 2 );
+							// only gap adjust right aligned elements or left aligned elements if the next element is not a left gap blocker
+							if ( previous_blackout.$el.hasClass( 'layout-box-insert-right' )
+							     || ! this.left_blocker_in_gap( previous_blackout.$el.next(), blackout.start ) ) {
+								this.adjust_down( previous_blackout.$el, gap_height / 2 );
+							}//end if
 						}//end if
 
 						start = blackout.end;
@@ -436,20 +440,16 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 		// determine if the left injection overlaps an element that should push it to the right
 		// this is not super efficient, but we will be doing this rarely, so it's probably ok?
+
 		if ( injectable.$el.hasClass( 'layout-box-insert-left' ) ) {
 			var injectable_attrs = this.attributes( injectable.$el );
 
-			var next_injection_point = this.attributes( $injection_point );
-			var tag;
-			while ( next_injection_point.end <= injection_gap.end && injectable_attrs.end > next_injection_point.start ) {
-				tag = next_injection_point.$el.prop( 'tagName' );
-				if ( tag === 'UL' || tag === 'LI' || tag === 'BLOCKQUOTE' ) {
-					console.info('FOUND ONE!!!!!!!!');
-					injectable.$el.removeClass( 'layout-box-insert-left' ).addClass( 'layout-box-insert-right' );
-				}//end if
+			var end = injection_gap.end < injectable_attrs.end ? injection_gap.end : injectable_attrs.end;
 
-				next_injection_point = this.attributes( next_injection_point.$el.next() );
-			}// end while
+			if ( this.left_blocker_in_gap( $injection_point, end ) ) {
+				console.info( 'shifting right!' );
+				injectable.$el.removeClass( 'layout-box-insert-left' ).addClass( 'layout-box-insert-right' );
+			}//end if
 		}//end if
 
 		$( document ).trigger( 'go-contentwidgets-injected', {
@@ -457,6 +457,21 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		} );
 
 		go_contentwidgets.log( 'end injecting injectable' );
+	};
+
+	go_contentwidgets.left_blocker_in_gap = function( $el, end ) {
+		var injection_point = this.attributes( $el );
+		while ( injection_point.end <= end && next_injection_point.start < end ) {
+			var tag = injection_point.$el.prop( 'tagName' );
+			console.info( tag );
+			if ( tag === 'UL' || tag === 'LI' || tag === 'BLOCKQUOTE' ) {
+				return false;
+			}//end if
+
+			injection_point = this.attributes( injection_point.$el.next() );
+		}// end while
+
+		return false;
 	};
 
 	$( function() {
