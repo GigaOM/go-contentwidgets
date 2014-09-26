@@ -46,7 +46,7 @@ class GO_ContentWidgets_Admin
 	public function admin_enqueue_scripts()
 	{
 		$data = array(
-			'sidebar_id' => 'gigaom-single-sidebar',
+			'sidebar_id' => 'gigaom-single-sidebar-ppr',
 			'layout_preferences' => get_option( go_contentwidgets()->id_base . '-layout-preferences' ),
 		);
 
