@@ -8,6 +8,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 (function( $ ) {
 	'use strict';
 
+	go_contentwidgets.full_inject_complete = false;
 	go_contentwidgets.current = Date.now();
 	go_contentwidgets.blackout_selector = '> *:not(p,blockquote,h1,h2,h3,h4,h5,h6,ol,ul,script,address)';
 
@@ -27,12 +28,22 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		} );
 
 		// watch for resizes and re-inject all the things
-		$( document ).on( 'go-resize', function() {
-			go_contentwidgets.$widgets.each( function() {
-				$( '#hidden-sidebar' ).append( $( this ) );
-			});
+		$( document ).on( 'go-resize', function( e, states ) {
+			if ( 'full' === states.to ) {
+				go_contentwidgets.unbookmark_ads();
 
-			go_contentwidgets.auto_inject();
+				if ( false === go_contentwidgets.full_inject_complete ) {
+					go_contentwidgets.auto_inject();
+				}//end if
+			} else {
+				var $ad_b_bookmark = $( '#ad-b-bookmark' );
+
+				if ( $ad_b_bookmark.length ) {
+					return;
+				}//end if
+
+				go_contentwidgets.inject_small();
+			}//end else
 		});
 	};
 
@@ -93,7 +104,12 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 		this.collect_widgets();
 
-		this.auto_inject();
+		// we do the standard auto_inject for 960px and greater
+		if ( $( 'body' ).outerWidth() >= 960 ) {
+			this.auto_inject();
+		} else {
+			this.inject_small();
+		}//end else
 
 		this.$content.find( '.layout-box-thing' ).remove();
 		$( '#body' ).addClass( 'rendered' );
@@ -102,6 +118,45 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 		$( document ).trigger( 'go-contentwidgets-complete' );
 		this.loading = false;
+	};
+
+	/**
+	 * inject ads b and c into the content of a post
+	 */
+	go_contentwidgets.inject_small = function() {
+		var $stuff = $( '.entry-content > .container > *:not(.layout-box-insert,.go-contentwidgets-spacer,.bookmarked-widget)' );
+		var $ad_b = $( '#ad-b' ).closest( '.widget-go-ads' );
+		var $ad_c = $( '#ad-c' ).closest( '.widget-go-ads' );
+
+		var $ad_b_bookmark = $( '<span id="ad-b-bookmark"/>' );
+		var $ad_c_bookmark = $( '<span id="ad-c-bookmark"/>' );
+
+		$ad_b.before( $ad_b_bookmark );
+		$ad_c.before( $ad_c_bookmark );
+
+		if ( $stuff.length >= 3 ) {
+			$stuff.eq( 1 ).after( $ad_b );
+		} else {
+			$stuff.eq( 0 ).after( $ad_c );
+		}//end else
+
+		$( '.entry-content > .tags' ).after( $ad_c );
+	};
+
+	/**
+	 * place ads b and c back where they belong
+	 */
+	go_contentwidgets.unbookmark_ads = function() {
+		var $ad_b_bookmark = $( '#ad-b-bookmark' );
+		var $ad_c_bookmark = $( '#ad-c-bookmark' );
+
+		if ( $ad_b_bookmark.length ) {
+			$ad_b_bookmark.replaceWith( $( '#ad-b' ).closest( '.widget-go-ads' ) );
+		}
+
+		if ( $ad_c_bookmark.length ) {
+			$ad_c_bookmark.replaceWith( $( '#ad-c' ).closest( '.widget-go-ads' ) );
+		}
 	};
 
 	go_contentwidgets.collect_widgets = function() {
@@ -215,6 +270,8 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 			go_contentwidgets.calc();
 			go_contentwidgets.inject_item( go_contentwidgets.insert[ i ] );
 		}// end foreach
+
+		this.full_inject_complete = true;
 	};
 
 	/**
