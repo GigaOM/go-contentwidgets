@@ -67,6 +67,30 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 			}//end else
 		});
 
+		$( '.alignleft' ).each( function() {
+			var $el = $( this );
+			var width = $el.outerWidth( false );
+
+			if ( $el.closest( '.aligncenter' ).length ) {
+				return;
+			}//end if
+
+			$el.wrap( '<div class="go-contentwidgets-align-container go-contentwidgets-alignleft"/>' );
+			$el.css( 'height', 'auto' );
+		});
+
+		$( '.alignright' ).each( function() {
+			var $el = $( this );
+			var width = $el.outerWidth( false );
+
+			if ( $el.closest( '.aligncenter' ).length ) {
+				return;
+			}//end if
+
+			$el.wrap( '<div class="go-contentwidgets-align-container go-contentwidgets-alignright"/>' );
+			$el.css( 'height', 'auto' );
+		});
+
 		this.collect_widgets();
 
 		this.auto_inject();
