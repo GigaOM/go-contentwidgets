@@ -64,7 +64,7 @@ if ( 'undefined' === typeof go_contentwidgets_admin ) {
 						'<label for="go-contentwidgets_' + widget_id + '_location">' +
 							'Horizontal placement preference:' +
 						'</label>' +
-						'<select class="layout-preference location widefat" name="go-contentwidgets[' + widget_id +'][location]" id="go-contentwidgets_' + widget_id + '_location">' +
+						'<select class="layout-preference location widefat" name="go-contentwidgets[' + widget_id + '][location]" id="go-contentwidgets_' + widget_id + '_location">' +
 							'<option value="any">No preference</option>' +
 							'<option value="full">Full width</option>' +
 							'<option value="left">Left</option>' +
@@ -75,7 +75,7 @@ if ( 'undefined' === typeof go_contentwidgets_admin ) {
 						'<label for="go-contentwidgets_' + widget_id + '_direction">' +
 							'Insert from the ' +
 						'</label>' +
-						'<select class="layout-preference direction widefat" name="go-contentwidgets[' + widget_id +'][direction]" id="go-contentwidgets_' + widget_id + '_direction">' +
+						'<select class="layout-preference direction widefat" name="go-contentwidgets[' + widget_id + '][direction]" id="go-contentwidgets_' + widget_id + '_direction">' +
 							'<option value="">top</option>' +
 							'<option value="bottom">bottom</option>' +
 						'</select>' +
