@@ -107,7 +107,6 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		// we do the standard auto_inject for 960px and greater
 		if ( $( 'body' ).outerWidth() >= 960 ) {
 			this.auto_inject();
-			this.full_inject_complete = true;
 		} else {
 			this.inject_small();
 		}//end else
@@ -271,6 +270,8 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 			go_contentwidgets.calc();
 			go_contentwidgets.inject_item( go_contentwidgets.insert[ i ] );
 		}// end foreach
+
+		this.full_inject_complete = true;
 	};
 
 	/**
