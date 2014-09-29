@@ -542,7 +542,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 	go_contentwidgets.left_blocker_in_gap = function( $el, end ) {
 		var injection_point = this.attributes( $el );
-		while ( injection_point.end <= end && next_injection_point.start < end ) {
+		while ( injection_point.end <= end && injection_point.start < end ) {
 			var tag = injection_point.$el.prop( 'tagName' );
 			console.info( tag );
 			if ( tag === 'UL' || tag === 'LI' || tag === 'BLOCKQUOTE' ) {
