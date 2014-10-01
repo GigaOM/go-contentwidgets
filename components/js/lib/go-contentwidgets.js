@@ -68,16 +68,6 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		this.$first_element = this.$content.find( ':first' );
 		this.$images = this.$content.find( 'img' );
 
-		this.$images.each( function() {
-			var $img = $( this );
-
-			if ( $img.attr( 'width' ) < $img.closest( '.entry-content' ).width() ) {
-				$img.css( 'height', $img.attr( 'height' ).concat( 'px' ) );
-			} else {
-				$img.css( 'height', 'auto' );
-			}//end else
-		});
-
 		$( '.alignleft' ).each( function() {
 			var $el = $( this );
 			var width = $el.outerWidth( false );
