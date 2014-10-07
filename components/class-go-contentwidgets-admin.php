@@ -7,9 +7,19 @@ class GO_ContentWidgets_Admin
 	 */
 	public function __construct()
 	{
-		add_action( 'current_screen', array( $this, 'current_screen' ) );
+		add_action( 'admin_init', array( $this, 'admin_init' ) );
 		add_action( 'sidebar_admin_setup', array( $this, 'sidebar_admin_setup' ) );
 	}//end __construct
+
+	/**
+	 * hooked to WordPress admin_init action
+	 */
+	public function admin_init()
+	{
+		$this->register_resources();
+
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
+	}// end admin_init
 
 	/**
 	 * registers script and style resources
@@ -26,25 +36,15 @@ class GO_ContentWidgets_Admin
 	}//end register_resources
 
 	/**
-	 * hooked to the current_screen action
+	 * hooked to the admin_enqueue_scripts action
 	 */
-	public function current_screen( $screen )
+	public function admin_enqueue_scripts( $current_page )
 	{
-		$this->register_resources();
-
-		if ( 'widgets' != $screen->base )
+		if ( 'widgets.php' !== $current_page )
 		{
 			return;
 		}//end if
 
-		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
-	}//end current_screen
-
-	/**
-	 * hooked to the admin_enqueue_scripts action
-	 */
-	public function admin_enqueue_scripts()
-	{
 		$data = array(
 			'sidebar_id' => 'gigaom-single-sidebar-ppr',
 			'layout_preferences' => get_option( go_contentwidgets()->id_base . '-layout-preferences' ),
