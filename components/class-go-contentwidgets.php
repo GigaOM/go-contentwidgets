@@ -13,6 +13,11 @@ class GO_ContentWidgets
 	public function __construct()
 	{
 		add_action( 'init', array( $this, 'init' ) );
+
+		if ( is_admin() )
+		{
+			$this->admin();
+		}//end if
 	}//end __construct
 
 	/**
@@ -20,11 +25,6 @@ class GO_ContentWidgets
 	 */
 	public function init()
 	{
-		if ( is_admin() )
-		{
-			$this->admin();
-		}//end if
-
 		wp_register_script(
 			$this->id_base,
 			plugins_url( 'js/lib/go-contentwidgets.js', __FILE__ ),
