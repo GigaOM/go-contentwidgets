@@ -71,24 +71,38 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		$( '.alignleft' ).each( function() {
 			var $el = $( this );
 			var width = $el.outerWidth( false );
+			var $el_to_wrap = $();
 
 			if ( $el.closest( '.aligncenter' ).length ) {
 				return;
 			}//end if
 
-			$el.wrap( '<div class="go-contentwidgets-align-container go-contentwidgets-alignleft"/>' );
+			if ( $el.closest( 'picture' ).length ) {
+				$el_to_wrap = $el.closest( 'picture' );
+			} else {
+				$el_to_wrap = $el;
+			}//end else
+
+			$el_to_wrap.wrap( '<div class="go-contentwidgets-align-container go-contentwidgets-alignleft"/>' );
 			$el.css( 'height', 'auto' );
 		});
 
 		$( '.alignright' ).each( function() {
 			var $el = $( this );
 			var width = $el.outerWidth( false );
+			var $el_to_wrap = $();
 
 			if ( $el.closest( '.aligncenter' ).length ) {
 				return;
 			}//end if
 
-			$el.wrap( '<div class="go-contentwidgets-align-container go-contentwidgets-alignright"/>' );
+			if ( $el.closest( 'picture' ).length ) {
+				$el_to_wrap = $el.closest( 'picture' );
+			} else {
+				$el_to_wrap = $el;
+			}//end else
+
+			$el_to_wrap.wrap( '<div class="go-contentwidgets-align-container go-contentwidgets-alignright"/>' );
 			$el.css( 'height', 'auto' );
 		});
 
