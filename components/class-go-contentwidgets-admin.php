@@ -2,14 +2,12 @@
 
 class GO_ContentWidgets_Admin
 {
-	public $sidebar_id = 'go-contentwidgets-injections';
 	/**
 	 * constructor
 	 */
 	public function __construct()
 	{
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
-		add_action( 'after_setup_theme', array( $this, 'after_setup_theme' ) );
 		add_action( 'sidebar_admin_setup', array( $this, 'sidebar_admin_setup' ) );
 	}//end __construct
 
@@ -22,23 +20,6 @@ class GO_ContentWidgets_Admin
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
 	}// end admin_init
-
-	/**
-	 * hooked to the WordPress after_setup_theme action
-	 */
-	public function after_setup_theme()
-	{
-		register_sidebar( array(
-			'name' => 'Content Widget Injections',
-			'id' => $this->sidebar_id,
-			'description' => 'This is the sidebar content area that will contain widgets to inject in the content.',
-			'class' => 'sidebar-widget-area widget-area',
-			'before_widget' => '<div id="%1$s" class="widget clearfix %2$s">',
-			'after_widget' => '</div>',
-			'before_title' => '<header class="widget-title">',
-			'after_title' => '</header>',
-		) );
-	}//end after_setup_theme
 
 	/**
 	 * registers script and style resources
@@ -65,7 +46,7 @@ class GO_ContentWidgets_Admin
 		}//end if
 
 		$data = array(
-			'sidebar_id' => $this->sidebar_id,
+			'sidebar_id' => go_contentwidgets()->sidebar_id,
 			'layout_preferences' => get_option( go_contentwidgets()->id_base . '-layout-preferences' ),
 		);
 

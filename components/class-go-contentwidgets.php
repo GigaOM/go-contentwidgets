@@ -3,6 +3,7 @@
 class GO_ContentWidgets
 {
 	public $id_base = 'go-contentwidgets';
+	public $sidebar_id = 'go-contentwidgets-injections';
 	private $admin;
 	private $script_config;
 	private $layout_preferences;
@@ -13,6 +14,7 @@ class GO_ContentWidgets
 	public function __construct()
 	{
 		add_action( 'init', array( $this, 'init' ) );
+		add_action( 'after_setup_theme', array( $this, 'after_setup_theme' ) );
 
 		if ( is_admin() )
 		{
@@ -36,6 +38,23 @@ class GO_ContentWidgets
 		// @todo this should only happen on `is_single`, but it was giving me trouble so I I'm moving on...
 		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) );
 	}//end init
+
+	/**
+	 * hooked to the WordPress after_setup_theme action
+	 */
+	public function after_setup_theme()
+	{
+		register_sidebar( array(
+			'name' => 'Content Widget Injections',
+			'id' => $this->sidebar_id,
+			'description' => 'This is the sidebar content area that will contain widgets to inject in the content.',
+			'class' => 'sidebar-widget-area widget-area',
+			'before_widget' => '<div id="%1$s" class="widget clearfix %2$s">',
+			'after_widget' => '</div>',
+			'before_title' => '<header class="widget-title">',
+			'after_title' => '</header>',
+		) );
+	}//end after_setup_theme
 
 	/**
 	 * script config
