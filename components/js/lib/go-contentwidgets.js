@@ -70,7 +70,6 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 		$( '.alignleft' ).each( function() {
 			var $el = $( this );
-			var width = $el.outerWidth( false );
 			var $el_to_wrap = $();
 
 			if ( $el.closest( '.aligncenter' ).length ) {
@@ -89,7 +88,6 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 		$( '.alignright' ).each( function() {
 			var $el = $( this );
-			var width = $el.outerWidth( false );
 			var $el_to_wrap = $();
 
 			if ( $el.closest( '.aligncenter' ).length ) {
@@ -383,7 +381,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		$injectable.before( $( '<div class="go-contentwidgets-spacer '+ alignment_class + '" style="height:' + distance +'px"/>' ) );
 	};
 
-	go_contentwidgets.identify_gaps = function( include_all ) {
+	go_contentwidgets.identify_gaps = function() {
 		var start = 0;
 		var gap;
 		var i;
@@ -399,6 +397,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		}//end if
 		else {
 			var previous_blackout = null;
+			var tmp;
 			for ( i = 0, length = this.inventory.blackouts.length; i < length; i++ ) {
 				var blackout = this.inventory.blackouts[ i ];
 
@@ -426,14 +425,14 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 					gap.height = gap_height;
 
 					if ( 0 === start ) {
-						var tmp = this.attributes( this.$first_element );
+						tmp = this.attributes( this.$first_element );
 
 						if ( tmp.end <= blackout.start ) {
 							gap.$first_el = this.$first_element;
 						}//end if
 					}//end if
 					else {
-						var tmp = this.attributes( previous_blackout.$el.next() );
+						tmp = this.attributes( previous_blackout.$el.next() );
 
 						// find an element below the blackout
 						while ( tmp.start < previous_blackout.end ) {
@@ -472,7 +471,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 					// check that the element we found is below the blackout
 					// @note: slight fear that this could cause an infinite loop
-					while ( gap.$first_el.length && 'undefined' != typeof gap.$first_el.get( 0 ).offsetTop && gap.$first_el.get( 0 ).offsetTop < previous_blackout.end ) {
+					while ( gap.$first_el.length && 'undefined' !== typeof gap.$first_el.get( 0 ).offsetTop && gap.$first_el.get( 0 ).offsetTop < previous_blackout.end ) {
 						gap.$first_el = gap.$first_el.next();
 					}// end while
 
