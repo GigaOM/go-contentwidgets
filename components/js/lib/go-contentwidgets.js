@@ -406,7 +406,8 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 					// if the gap height isn't tall enough for our shortest widget, don't bother with it
 					if ( 0 === gap_height || gap_height < this.shortest_widget_height ) {
-						if ( previous_blackout.$el.hasClass( 'layout-box-insert' ) ) {
+						// check if the there was a previous blackout and if it was a right insert, if so, rebalance
+						if ( null !== previous_blackout && previous_blackout.$el.hasClass( 'layout-box-insert' ) ) {
 							// only gap adjust right aligned elements or left aligned elements if the next element is not a left gap blocker
 							if ( previous_blackout.$el.hasClass( 'layout-box-insert-right' )
 							     || ! this.left_blocker_in_gap( previous_blackout.$el.next(), blackout.start ) ) {
