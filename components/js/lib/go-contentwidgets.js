@@ -120,7 +120,6 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		this.$content.find( '.layout-box-thing' ).remove();
 		$( '#body' ).addClass( 'rendered' );
 		go_contentwidgets.current = Date.now();
-		console.info( 'Took this long:', go_contentwidgets.current - go_contentwidgets.start );
 
 		$( document ).trigger( 'go-contentwidgets-complete' );
 		this.loading = false;
@@ -536,7 +535,6 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 			var end = injection_gap.end < injectable_attrs.end ? injection_gap.end : injectable_attrs.end;
 
 			if ( this.left_blocker_in_gap( $injection_point, end ) ) {
-				console.info( 'shifting right!' );
 				injectable.$el.removeClass( 'layout-box-insert-left' ).addClass( 'layout-box-insert-right' );
 			}//end if
 		}//end if
@@ -552,7 +550,6 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		var injection_point = this.attributes( $el );
 		while ( injection_point.end <= end && injection_point.start < end ) {
 			var tag = injection_point.$el.prop( 'tagName' );
-			console.info( tag );
 			if ( tag === 'UL' || tag === 'LI' || tag === 'BLOCKQUOTE' ) {
 				return false;
 			}//end if
