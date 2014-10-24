@@ -72,7 +72,9 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 			var $el = $( this );
 			var $el_to_wrap = $();
 
-			if ( $el.closest( '.aligncenter' ).length ) {
+			if ( $el.closest( '.aligncenter' ).length
+				// handle images with captions that are aligned left and already wrapped
+			    || $el.parents( '.alignleft' ).length ) {
 				return;
 			}//end if
 
@@ -90,7 +92,9 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 			var $el = $( this );
 			var $el_to_wrap = $();
 
-			if ( $el.closest( '.aligncenter' ).length ) {
+			if ( $el.closest( '.aligncenter' ).length
+				// handle images with captions that are aligned right and already wrapped
+			    || $el.parents( '.alignright' ).length ) {
 				return;
 			}//end if
 
