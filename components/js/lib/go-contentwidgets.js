@@ -68,6 +68,16 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		this.$first_element = this.$content.find( ':first' );
 		this.$images = this.$content.find( 'img' );
 
+		this.$images.each( function() {
+			var $img = $( this );
+
+			if ( $img.attr( 'width' ) < $img.closest( '.entry-content' ).width() ) {
+				$img.css( 'height', $img.attr( 'height' ).concat( 'px' ) );
+			} else {
+				$img.css( 'height', 'auto' );
+			}//end else
+		});
+
 		$( '.alignleft' ).each( function() {
 			var $el = $( this );
 			var $el_to_wrap = $();
@@ -120,6 +130,10 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		this.$content.find( '.layout-box-thing' ).remove();
 		$( '#body' ).addClass( 'rendered' );
 		go_contentwidgets.current = Date.now();
+
+		// manual heights were added to all images to enable proper insertion. Let's remove the manual heights
+		// so CSS will work as expected
+		this.$images.css( 'height', 'auto' );
 
 		$( document ).trigger( 'go-contentwidgets-complete' );
 		this.loading = false;
