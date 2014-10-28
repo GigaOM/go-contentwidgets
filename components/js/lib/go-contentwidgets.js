@@ -68,16 +68,6 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		this.$first_element = this.$content.find( ':first' );
 		this.$images = this.$content.find( 'img' );
 
-		this.$images.each( function() {
-			var $img = $( this );
-
-			if ( $img.attr( 'width' ) < $img.closest( '.entry-content' ).width() ) {
-				$img.css( 'height', $img.attr( 'height' ).concat( 'px' ) );
-			} else {
-				$img.css( 'height', 'auto' );
-			}//end else
-		});
-
 		$( '.alignleft' ).each( function() {
 			var $el = $( this );
 			var $el_to_wrap = $();
@@ -130,10 +120,6 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		this.$content.find( '.layout-box-thing' ).remove();
 		$( '#body' ).addClass( 'rendered' );
 		go_contentwidgets.current = Date.now();
-
-		// manual heights were added to all images to enable proper insertion. Let's remove the manual heights
-		// so CSS will work as expected
-		this.$images.css( 'height', 'auto' );
 
 		$( document ).trigger( 'go-contentwidgets-complete' );
 		this.loading = false;
@@ -285,10 +271,25 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 	 * auto injects items in order
 	 */
 	go_contentwidgets.auto_inject = function() {
+		// before doing a full auto inject, all images need to have their heights set
+		this.$images.each( function() {
+			var $img = $( this );
+
+			if ( $img.attr( 'width' ) < $img.closest( '.entry-content' ).width() ) {
+				$img.css( 'height', $img.attr( 'height' ).concat( 'px' ) );
+			} else {
+				$img.css( 'height', 'auto' );
+			}//end else
+		});
+
 		for ( var i = 0, length = go_contentwidgets.insert.length; i < length; i++ ) {
 			go_contentwidgets.calc();
 			go_contentwidgets.inject_item( go_contentwidgets.insert[ i ] );
 		}// end foreach
+
+		// manual heights were added to all images to enable proper insertion. Let's remove the manual heights
+		// so our CSS will work as expected
+		this.$images.css( 'height', 'auto' );
 
 		this.full_inject_complete = true;
 	};
