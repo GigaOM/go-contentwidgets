@@ -289,7 +289,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 		// manual heights were added to all images to enable proper insertion. Let's remove the manual heights
 		// so our CSS will work as expected
-		this.$images.css( 'height', 'auto' );
+		this.$images.css( 'height', '' );
 
 		this.full_inject_complete = true;
 	};
