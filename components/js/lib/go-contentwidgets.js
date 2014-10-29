@@ -560,7 +560,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		while ( injection_point.end <= end && injection_point.start < end ) {
 			tag = injection_point.$el.prop( 'tagName' );
 
-			if ( $.inArray( tag, left_blockers ) ) {
+			if ( -1 !== $.inArray( tag, left_blockers ) ) {
 				return true;
 			}//end if
 
@@ -569,7 +569,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 		tag = injection_point.$el.prop( 'tagName' );
 
-		if ( $.inArray( tag, left_blockers ) ) {
+		if ( -1 !== $.inArray( tag, left_blockers ) ) {
 			return true;
 		}//end if
 
