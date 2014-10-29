@@ -534,7 +534,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 			var end = injection_gap.end < injectable_attrs.end ? injection_gap.end : injectable_attrs.end;
 
-			if ( this.left_blocker_in_gap( $injection_point, end ) ) {
+			if ( this.left_blocker_in_gap( injectable.$el.next(), end ) ) {
 				injectable.$el.removeClass( 'layout-box-insert-left' ).addClass( 'layout-box-insert-right' );
 			}//end if
 		}//end if
@@ -547,15 +547,31 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 	};
 
 	go_contentwidgets.left_blocker_in_gap = function( $el, end ) {
+		var tag;
 		var injection_point = this.attributes( $el );
+
+		var left_blockers = [
+			'OL',
+			'UL',
+			'LI',
+			'BLOCKQUOTE'
+		];
+
 		while ( injection_point.end <= end && injection_point.start < end ) {
-			var tag = injection_point.$el.prop( 'tagName' );
-			if ( tag === 'UL' || tag === 'LI' || tag === 'BLOCKQUOTE' ) {
-				return false;
+			tag = injection_point.$el.prop( 'tagName' );
+
+			if ( $.inArray( tag, left_blockers ) ) {
+				return true;
 			}//end if
 
 			injection_point = this.attributes( injection_point.$el.next() );
 		}// end while
+
+		tag = injection_point.$el.prop( 'tagName' );
+
+		if ( $.inArray( tag, left_blockers ) ) {
+			return true;
+		}//end if
 
 		return false;
 	};
