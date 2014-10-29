@@ -302,6 +302,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 	 */
 	go_contentwidgets.attributes = function( $el ) {
 		var margin_top = $el.css( 'margin-top' );
+
 		margin_top = parseInt( margin_top.replace( 'px', '' ), 10 );
 
 		var start = $el.get( 0 ).offsetTop;
@@ -458,6 +459,10 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 							tmp.$el = tmp.$el.next();
 							if ( tmp.$el.is( '.layout-box-thing' ) ) {
 								continue;
+							}//end if
+
+							if ( ! tmp.$el.length ) {
+								break;
 							}//end if
 
 							tmp = this.attributes( tmp.$el );
