@@ -301,11 +301,19 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 	 * @return object with measurement attributes
 	 */
 	go_contentwidgets.attributes = function( $el ) {
+		var start;
 		var margin_top = $el.css( 'margin-top' );
 
 		margin_top = parseInt( margin_top.replace( 'px', '' ), 10 );
 
-		var start = $el.get( 0 ).offsetTop;
+		// if we're looking at an item in the list, we need to get the offset of the li, not the item itself
+		if ( $el.closest( 'li' ).length ) {
+			start = $el.closest( 'li' ).get( 0 ).offsetTop;
+		} else {
+			// otherwise, just get the offset value of the element
+			start = $el.get( 0 ).offsetTop;
+		}//end else
+
 		start -= margin_top;
 
 		var height = parseInt( $el.outerHeight( true ), 10 );
@@ -366,11 +374,11 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 		go_contentwidgets.log( 'after find :visible / before find children' );
 		// find child blackouts
-		this.$content.find( '> p *' ).filter( 'img,iframe,.layout-box-insert' ).each( function() {
+		this.$content.find( '> p *, > ol *, > ul *' ).filter( 'img,iframe,.layout-box-insert' ).each( function() {
 			var $el = $( this );
 			var attr = go_contentwidgets.attributes( $el );
 			// since this is a child, after we've calculated the blackout grab its parent p
-			attr.$el = $el.closest( 'p' );
+			attr.$el = $el.closest( 'p,li' );
 			go_contentwidgets.inventory.blackouts.push( attr );
 		});
 
@@ -454,9 +462,28 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 					else {
 						tmp = this.attributes( previous_blackout.$el.next() );
 
+						// as we attempt to find an element below the blackout, we'll need to track
+						// how we're looping over list items and ol/uls
+						var jumping_out_of_list = false;
+
 						// find an element below the blackout
 						while ( tmp.start < previous_blackout.end ) {
+							// assume we aren't jumping out of a list
+							jumping_out_of_list = false;
+
+							// if the current item is the last li, we need to jump back out of the list
+							if ( tmp.$el.is( 'li' ) && ! tmp.$el.next().length ) {
+								tmp.$el = tmp.$el.closest( 'ol,ul' );
+								jumping_out_of_list = true;
+							}//end if
+
 							tmp.$el = tmp.$el.next();
+
+							// if the current element is an ol/ul, we need to traverse INTO the list. Unless, of course, we just jumped out of one.
+							if ( tmp.$el.is( 'ul,ol' ) && ! jumping_out_of_list ) {
+								tmp.$el = tmp.$el.find( 'li:first' );
+							}//end if
+
 							if ( tmp.$el.is( '.layout-box-thing' ) ) {
 								continue;
 							}//end if
@@ -544,7 +571,12 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 			return false;
 		}// end if
 
-		$injection_point.before( injectable.$el );
+		if ( $injection_point.is( 'li' ) ) {
+			$injection_point.before( '<li class="injection-list-item"/>' );
+			$injection_point.prev().append( injectable.$el );
+		} else {
+			$injection_point.before( injectable.$el );
+		}//end else
 
 		// determine if the left injection overlaps an element that should push it to the right
 		// this is not super efficient, but we will be doing this rarely, so it's probably ok?
