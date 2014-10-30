@@ -567,15 +567,31 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 	};
 
 	go_contentwidgets.left_blocker_in_gap = function( $el, end ) {
+		var tag;
 		var injection_point = this.attributes( $el );
+
+		var left_blockers = [
+			'OL',
+			'UL',
+			'LI',
+			'BLOCKQUOTE'
+		];
+
 		while ( injection_point.end <= end && injection_point.start < end ) {
-			var tag = injection_point.$el.prop( 'tagName' );
-			if ( tag === 'UL' || tag === 'LI' || tag === 'BLOCKQUOTE' ) {
-				return false;
+			tag = injection_point.$el.prop( 'tagName' );
+
+			if ( -1 !== $.inArray( tag, left_blockers ) ) {
+				return true;
 			}//end if
 
 			injection_point = this.attributes( injection_point.$el.next() );
 		}// end while
+
+		tag = injection_point.$el.prop( 'tagName' );
+
+		if ( -1 !== $.inArray( tag, left_blockers ) ) {
+			return true;
+		}//end if
 
 		return false;
 	};
