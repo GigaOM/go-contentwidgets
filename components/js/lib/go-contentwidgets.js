@@ -307,8 +307,9 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		margin_top = parseInt( margin_top.replace( 'px', '' ), 10 );
 
 		// if we're looking at an item in the list, we need to get the offset of the li, not the item itself
-		if ( $el.closest( 'li' ).length ) {
-			start = $el.closest( 'li' ).get( 0 ).offsetTop;
+		var $closest_li = $el.closest( 'li' );
+		if ( $closest_li.length ) {
+			start = $closest_li.get( 0 ).offsetTop;
 		} else {
 			// otherwise, just get the offset value of the element
 			start = $el.get( 0 ).offsetTop;
