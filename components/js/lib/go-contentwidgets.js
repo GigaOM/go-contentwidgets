@@ -534,7 +534,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 			var end = injection_gap.end < injectable_attrs.end ? injection_gap.end : injectable_attrs.end;
 
-			if ( this.left_blocker_in_gap( injectable.$el.next(), end ) ) {
+			if ( this.left_blocker_in_gap( $injection_point, end ) ) {
 				injectable.$el.removeClass( 'layout-box-insert-left' ).addClass( 'layout-box-insert-right' );
 			}//end if
 		}//end if
