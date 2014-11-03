@@ -438,9 +438,15 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 						// check if the there was a previous blackout and if it was a right insert, if so, rebalance
 						if ( null !== previous_blackout && previous_blackout.$el.hasClass( 'layout-box-insert' ) ) {
 							// only gap adjust right aligned elements or left aligned elements if the next element is not a left gap blocker
-							if ( previous_blackout.$el.hasClass( 'layout-box-insert-right' )
-							     || ! this.left_blocker_in_gap( previous_blackout.$el.next(), blackout.start ) ) {
+							if (
+								previous_blackout.$el.hasClass( 'layout-box-insert-right' )
+								|| ! this.left_blocker_in_gap( previous_blackout.$el.next(), blackout.start )
+							) {
 								this.adjust_down( previous_blackout.$el, gap_height / 2 );
+
+								// if the blackout has been adjusted down, recalculate the start/end
+								blackout.start = blackout.$el.position().top;
+								blackout.end = blackout.start + blackout.height;
 							}//end if
 						}//end if
 
@@ -497,7 +503,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 							tmp = this.attributes( tmp.$el );
 						}// end while
 
-						if ( tmp.start >= previous_blackout.end && tmp.end <= blackout.start ) {
+						if ( tmp.start >= previous_blackout.end && tmp.end < blackout.start ) {
 							gap.$first_el = tmp.$el;
 						}//end if
 					}//end else
