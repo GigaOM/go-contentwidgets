@@ -11,7 +11,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 	go_contentwidgets.full_inject_complete = false;
 	go_contentwidgets.current = Date.now();
 	// set up blackout selectors. NOTE: blockquotes are not blackouts except when they are tweet-embeds
-	go_contentwidgets.blackout_selector = '> *:not(p,blockquote:not(.tweet-embed),h1,h2,h3,h4,h5,h6,ol,ul,script,address)';
+	go_contentwidgets.blackout_selector = '> *:not(p,blockquote:not(.twitter-tweet),h1,h2,h3,h4,h5,h6,ol,ul,script,address)';
 
 	go_contentwidgets.log = function( text ) {
 		go_contentwidgets.current = Date.now();
