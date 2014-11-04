@@ -134,6 +134,9 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		var $ad_b = $( '#ad-b' ).closest( '.widget-go-ads' );
 		var $ad_c = $( '#ad-c' ).closest( '.widget-go-ads' );
 
+		$ad_b.removeClass( 'small-inject' );
+		$ad_c.removeClass( 'small-inject' );
+
 		var $ad_b_bookmark = $( '<span id="ad-b-bookmark"/>' );
 		var $ad_c_bookmark = $( '<span id="ad-c-bookmark"/>' );
 
@@ -174,9 +177,11 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		// if our inject_location is less than the length of stuff, we still have an injection point
 		if ( inject_location < $stuff.length ) {
 			$stuff.eq( inject_location ).after( $ad_b );
+			$ad_b.addClass( 'small-inject' );
 		}//end if
 
-		$( '.entry-content > .tags' ).after( $ad_c );
+		$( '.post-page-tags > .sorted_tags' ).after( $ad_c );
+		$ad_c.addClass( 'small-inject' );
 	};
 
 	/**
