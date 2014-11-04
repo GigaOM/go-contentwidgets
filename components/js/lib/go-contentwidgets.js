@@ -140,11 +140,41 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		$ad_b.before( $ad_b_bookmark );
 		$ad_c.before( $ad_c_bookmark );
 
+		var insert_after = 0;
+
+		// try to find a spot that isn't right next to a floated element
+		$stuff.each( function() {
+			var $el = $( this );
+
+			if ( $el.find( '.go-contentwidgets-alignright,.go-contentwidgets-alignleft' ).length ) {
+				insert_after++;
+			}//end if
+		});
+
+		var inject_location = insert_after;
+
+		// if we have more than 2 elements in the post, inject after the first safe spot
 		if ( $stuff.length >= 3 ) {
-			$stuff.eq( 1 ).after( $ad_b );
-		} else {
-			$stuff.eq( 0 ).after( $ad_c );
-		}//end else
+			inject_location += 1;
+
+			// make sure we haven't gone too far
+			if ( $stuff.length < inject_location ) {
+				inject_location--;
+			}//end if
+		}//end if
+
+		// We can't inject if the immediately previous element or two elements previous are aligned elements
+		if (
+			$stuff.eq( inject_location ).prev().find( '.go-contentwidgets-aligright,.go-contentwidgets-alignleft' ).length
+			|| $stuff.eq( inject_location ).prev().prev().find( '.go-contentwidgets-aligright,.go-contentwidgets-alignleft' ).length
+		) {
+			inject_location++;
+		}//end if
+
+		// if our inject_location is less than the length of stuff, we still have an injection point
+		if ( inject_location < $stuff.length ) {
+			$stuff.eq( inject_location ).after( $ad_b );
+		}//end if
 
 		$( '.entry-content > .tags' ).after( $ad_c );
 	};
