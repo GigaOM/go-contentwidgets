@@ -64,8 +64,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		};
 
 		this.$body = $( document.getElementById( 'body' ) );
-		this.$content_container = this.$body.find( '.post section.body.entry-content' );
-		this.$content = this.$content_container.find( '> div' );
+		this.$content = this.$body.find( '.post section.body.entry-content > div' );
 
 		this.$first_element = this.$content.find( ':first' );
 		this.$images = this.$content.find( 'img' );
