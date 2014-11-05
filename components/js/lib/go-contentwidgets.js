@@ -22,7 +22,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 	go_contentwidgets.events = function() {
 		// compatibility with bcms wijax widgets
 		$( document ).on( 'wijax-loaded', function( event, widget_id ) {
-			var $widget = $( '#' + widget_id );
+			var $widget = $( document.getElementById( widget_id ) );
 			if ( $widget.closest( '#hidden-sidebar' ).length > 0 ) {
 				go_contentwidgets.single_widget_inject( $widget );
 			}//end if
@@ -37,7 +37,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 					go_contentwidgets.auto_inject();
 				}//end if
 			} else {
-				var $ad_b_bookmark = $( '#ad-b-bookmark' );
+				var $ad_b_bookmark = $( document.getElementById( 'ad-b-bookmark' ) );
 
 				if ( $ad_b_bookmark.length ) {
 					return;
@@ -63,11 +63,14 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 			gaps: []
 		};
 
-		this.$body = $( '#body' ).find( '.post section.body.entry-content' );
-		this.$content = this.$body.find( '> div' );
+		this.$body = $( document.getElementById( 'body' ) );
+		this.$content = this.$body.find( '.post section.body.entry-content > div' );
 
 		this.$first_element = this.$content.find( ':first' );
 		this.$images = this.$content.find( 'img' );
+
+		this.$ad_b = $( document.getElementById( 'ad-b' ) );
+		this.$ad_c = $( document.getElementById( 'ad-c' ) );
 
 		$( '.alignleft' ).each( function() {
 			var $el = $( this );
@@ -119,7 +122,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		}//end else
 
 		this.$content.find( '.layout-box-thing' ).remove();
-		$( '#body' ).addClass( 'rendered' );
+		this.$body.addClass( 'rendered' );
 		go_contentwidgets.current = Date.now();
 
 		$( document ).trigger( 'go-contentwidgets-complete' );
@@ -131,17 +134,17 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 	 */
 	go_contentwidgets.inject_small = function() {
 		var $stuff = $( '.entry-content > .container > *:not(.layout-box-insert,.go-contentwidgets-spacer,.bookmarked-widget)' );
-		var $ad_b = $( '#ad-b' ).closest( '.widget-go-ads' );
-		var $ad_c = $( '#ad-c' ).closest( '.widget-go-ads' );
+		var $ad_b_container = this.$ad_b.closest( '.widget-go-ads' );
+		var $ad_c_container = this.$ad_c.closest( '.widget-go-ads' );
 
-		$ad_b.removeClass( 'small-inject' );
-		$ad_c.removeClass( 'small-inject' );
+		$ad_b_container.removeClass( 'small-inject' );
+		$ad_c_container.removeClass( 'small-inject' );
 
 		var $ad_b_bookmark = $( '<span id="ad-b-bookmark"/>' );
 		var $ad_c_bookmark = $( '<span id="ad-c-bookmark"/>' );
 
-		$ad_b.before( $ad_b_bookmark );
-		$ad_c.before( $ad_c_bookmark );
+		$ad_b_container.before( $ad_b_bookmark );
+		$ad_c_container.before( $ad_c_bookmark );
 
 		var insert_after = 0;
 
@@ -177,32 +180,32 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		// if our inject_location is less than the length of stuff, we still have an injection point
 		if ( inject_location < $stuff.length ) {
 			$stuff.eq( inject_location ).after( $ad_b );
-			$ad_b.addClass( 'small-inject' );
+			$ad_b_container.addClass( 'small-inject' );
 		}//end if
 
 		$( '.post-page-tags > .sorted_tags' ).after( $ad_c );
-		$ad_c.addClass( 'small-inject' );
+		$ad_c_container.addClass( 'small-inject' );
 	};
 
 	/**
 	 * place ads b and c back where they belong
 	 */
 	go_contentwidgets.unbookmark_ads = function() {
-		var $ad_b_bookmark = $( '#ad-b-bookmark' );
-		var $ad_c_bookmark = $( '#ad-c-bookmark' );
+		var $ad_b_bookmark = $( document.getElementById( 'ad-b-bookmark' ) );
+		var $ad_c_bookmark = $( document.getElementById( 'ad-c-bookmark' ) );
 
 		if ( $ad_b_bookmark.length ) {
-			$ad_b_bookmark.replaceWith( $( '#ad-b' ).closest( '.widget-go-ads' ) );
+			$ad_b_bookmark.replaceWith( this.$ad_b.closest( '.widget-go-ads' ) );
 		}
 
 		if ( $ad_c_bookmark.length ) {
-			$ad_c_bookmark.replaceWith( $( '#ad-c' ).closest( '.widget-go-ads' ) );
+			$ad_c_bookmark.replaceWith( this.$ad_c.closest( '.widget-go-ads' ) );
 		}
 	};
 
 	go_contentwidgets.collect_widgets = function() {
 		go_contentwidgets.log( 'collecting widgets' );
-		this.$widgets = $( '#hidden-sidebar > div:not(.widget_wijax)' );
+		this.$widgets = $( document.getElementById( 'hidden-sidebar' ) ).find( '> div:not(.widget_wijax)' );
 		this.$widgets.each( function() {
 			go_contentwidgets.add_widget( $( this ) );
 		} );
