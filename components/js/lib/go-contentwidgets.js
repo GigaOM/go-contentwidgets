@@ -179,11 +179,11 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 		// if our inject_location is less than the length of stuff, we still have an injection point
 		if ( inject_location < $stuff.length ) {
-			$stuff.eq( inject_location ).after( $ad_b );
+			$stuff.eq( inject_location ).after( $ad_b_container );
 			$ad_b_container.addClass( 'small-inject' );
 		}//end if
 
-		$( '.post-page-tags > .sorted_tags' ).after( $ad_c );
+		$( '.post-page-tags > .sorted_tags' ).after( $ad_c_container );
 		$ad_c_container.addClass( 'small-inject' );
 	};
 
