@@ -547,11 +547,11 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 					}//end else
 
 					if ( gap.$first_el.length ) {
-						var first_el_attrs = this.attributes( gap.$first_el );
+						var first_el_start = gap.$first_el.position().top;
 
 						// make sure the height is calculated correctly starting from the first injectable area
-						gap.height = gap.height - ( first_el_attrs.start - blackout.end );
-						gap.start = first_el_attrs.start;
+						gap.height = gap.height - ( first_el_start - previous_blackout.end );
+						gap.start = first_el_start;
 
 						// if there isn't enough room for the shortest widget, don't add the gap
 						if ( gap.height > this.shortest_widget_height ) {
@@ -583,11 +583,11 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 					// make sure the gap has an element in it, if not, it can't be counted
 					if ( gap.$first_el.length && gap.$first_el.get( 0 ).offsetTop ) {
-						var first_el_attrs = this.attributes( gap.$first_el );
+						var first_el_start = gap.$first_el.position().top;
 
 						// make sure the height is calculated correctly starting from the first injectable area
-						gap.height = gap.height - ( first_el_attrs.start - previous_blackout.end );
-						gap.start = first_el_attrs.start;
+						gap.height = gap.height - ( first_el_start - previous_blackout.end );
+						gap.start = first_el_start;
 
 						// if there isn't enough room for the shortest widget, don't add the gap
 						if ( gap.height > this.shortest_widget_height ) {
