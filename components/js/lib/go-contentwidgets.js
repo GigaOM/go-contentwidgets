@@ -454,6 +454,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		var i;
 		var gap_height;
 		var length;
+		var first_el_start;
 
 		if ( 0 === this.inventory.blackouts.length ) {
 			gap = {};
@@ -547,7 +548,19 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 					}//end else
 
 					if ( gap.$first_el.length ) {
-						this.inventory.gaps.push( gap );
+
+						if ( 'undefined' !== typeof previous_blackout && previous_blackout ) {
+							first_el_start = gap.$first_el.position().top;
+
+							// make sure the height is calculated correctly starting from the first injectable area
+							gap.height = gap.height - ( first_el_start - previous_blackout.end );
+							gap.start = first_el_start;
+						}//end if
+
+						// if there isn't enough room for the shortest widget, don't add the gap
+						if ( gap.height > this.shortest_widget_height ) {
+							this.inventory.gaps.push( gap );
+						}//end if
 					}//end if
 				}//end if
 
@@ -574,7 +587,16 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 					// make sure the gap has an element in it, if not, it can't be counted
 					if ( gap.$first_el.length && gap.$first_el.get( 0 ).offsetTop ) {
-						this.inventory.gaps.push( gap );
+						first_el_start = gap.$first_el.position().top;
+
+						// make sure the height is calculated correctly starting from the first injectable area
+						gap.height = gap.height - ( first_el_start - previous_blackout.end );
+						gap.start = first_el_start;
+
+						// if there isn't enough room for the shortest widget, don't add the gap
+						if ( gap.height > this.shortest_widget_height ) {
+							this.inventory.gaps.push( gap );
+						}//end if
 					}//end if
 				}//end if
 			}//end if
@@ -587,6 +609,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		var $injection_point = null;
 		var gap = null;
 		var injection_gap = null;
+		var $tmp;
 		go_contentwidgets.log( 'injecting injectable' );
 
 		for ( i = 0, length = this.inventory.gaps.length; i < length; i++ ) {
@@ -601,7 +624,16 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 					var next_injection_point = this.attributes( $injection_point );
 					while ( next_injection_point.end <= gap.end && ( gap.end - next_injection_point.start ) > injectable.height ) {
 						$injection_point = next_injection_point.$el;
-						next_injection_point = this.attributes( $injection_point.next() );
+
+						// we need to make sure we aren't selecting a blackout overlay
+						$tmp = $injection_point.next( ':not(.layout-box-thing)' );
+
+						// if there's nothing else to select, then we're done searching for an injection point
+						if ( ! $tmp.length ) {
+							break;
+						}//end if
+
+						next_injection_point = this.attributes( $tmp );
 					}// end while
 					injection_gap = gap;
 				}//end if
