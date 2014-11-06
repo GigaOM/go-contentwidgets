@@ -547,7 +547,16 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 					}//end else
 
 					if ( gap.$first_el.length ) {
-						this.inventory.gaps.push( gap );
+						var first_el_attrs = this.attributes( gap.$first_el );
+
+						// make sure the height is calculated correctly starting from the first injectable area
+						gap.height = gap.height - ( first_el_attrs.start - blackout.end );
+						gap.start = first_el_attrs.start;
+
+						// if there isn't enough room for the shortest widget, don't add the gap
+						if ( gap.height > this.shortest_widget_height ) {
+							this.inventory.gaps.push( gap );
+						}//end if
 					}//end if
 				}//end if
 
@@ -574,7 +583,16 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 					// make sure the gap has an element in it, if not, it can't be counted
 					if ( gap.$first_el.length && gap.$first_el.get( 0 ).offsetTop ) {
-						this.inventory.gaps.push( gap );
+						var first_el_attrs = this.attributes( gap.$first_el );
+
+						// make sure the height is calculated correctly starting from the first injectable area
+						gap.height = gap.height - ( first_el_attrs.start - previous_blackout.end );
+						gap.start = first_el_attrs.start;
+
+						// if there isn't enough room for the shortest widget, don't add the gap
+						if ( gap.height > this.shortest_widget_height ) {
+							this.inventory.gaps.push( gap );
+						}//end if
 					}//end if
 				}//end if
 			}//end if
