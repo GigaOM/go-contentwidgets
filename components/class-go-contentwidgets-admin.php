@@ -2,6 +2,8 @@
 
 class GO_ContentWidgets_Admin
 {
+	public $id_base = 'go-contentwidgets';
+
 	/**
 	 * constructor
 	 */
@@ -9,6 +11,8 @@ class GO_ContentWidgets_Admin
 	{
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
 		add_action( 'sidebar_admin_setup', array( $this, 'sidebar_admin_setup' ) );
+		add_action( 'go_waterfall_options_meta_box', array( $this, 'go_waterfall_options_meta_box' ) );
+		add_action( 'save_post', array( $this, 'save_post' ) );
 	}//end __construct
 
 	/**
@@ -40,7 +44,7 @@ class GO_ContentWidgets_Admin
 	 */
 	public function admin_enqueue_scripts( $current_page )
 	{
-		if ( 'widgets.php' !== $current_page )
+		if ( 'widgets.php' !== $current_page && 'post.php' !== $current_page )
 		{
 			return;
 		}//end if
@@ -94,4 +98,128 @@ class GO_ContentWidgets_Admin
 
 		unset( $_POST['go-contentwidgets'] );
 	}//end sidebar_admin_setup
+
+	/**
+	 * meta box for controlling injectable units
+	 */
+	public function go_waterfall_options_meta_box( $post )
+	{
+		global $post;
+
+		$post_meta = get_post_meta( $post->ID, 'go-contentwidgets', TRUE );
+
+		$suppress = array(
+			'suppress-house-ctas' => 'Suppress house CTAs',
+			'suppress-ads' => 'Suppress ads (this removes ads from the whole page!)',
+		);
+
+		wp_nonce_field( 'go-contentwidgets-save', '_go_contentwidgets_save_nonce' );
+
+		?>
+		<h4 id="go-contentwidgets-injections">Content injections</h4>
+		<?php
+
+		foreach ( $suppress as $item => $label )
+		{
+			if ( ! isset( $post_meta[ $item ] ) )
+			{
+				$post_meta[ $item ] = FALSE;
+			}//end if
+
+			$style = '';
+			if ( 'suppress-ads' == $item && ! $post_meta[ $item ] )
+			{
+				$style = 'display: none;';
+			}//end if
+
+			?>
+			<p id="go-contentwidgets-<?php echo esc_attr( $item ); ?>-container" style="<?php echo esc_attr( $style ); ?>">
+				<label for="<?php echo esc_attr( $this->get_field_id( $item ) ); ?>">
+					<input type="checkbox" name="<?php echo esc_attr( $this->get_field_name( $item ) ); ?>" id="<?php echo esc_attr( $this->get_field_id( $item ) ); ?>" value="1" <?php checked( TRUE, $post_meta[ $item ] ); ?>/>
+					<?php echo esc_html( $label ); ?>
+				</label>
+			</p>
+			<?php
+		}//end foreach
+	} // END go_waterfall_options_meta_box
+
+	/**
+	 * Helper function for generating consistent field names
+	 *
+	 * @param $name string slug name for the field
+	 */
+	private function get_field_name( $name )
+	{
+		return "{$this->id_base}[{$name}]";
+	}// end get_field_name
+
+	/**
+	 * Helper function for generating consistent field ids
+	 *
+	 * @param $name string slug name for the field
+	 */
+	private function get_field_id( $name )
+	{
+		return $this->id_base . '-' . $name;
+	}// end get_field_id
+
+	/**
+	 * hooked to the save_post action
+	 */
+	public function save_post( $post_id )
+	{
+		if ( ! isset( $_REQUEST['_go_contentwidgets_save_nonce'] ) || ! wp_verify_nonce( $_REQUEST['_go_contentwidgets_save_nonce'], 'go-contentwidgets-save' ) )
+		{
+			return;
+		}//end if
+
+		$post = get_post( $post_id );
+
+		// Check that this isn't an autosave
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
+		{
+			return;
+		}//end if
+
+		// Check post type
+		if ( 'post' != $post->post_type )
+		{
+			return;
+		}//end if
+
+		// Don't run on post revisions (almost always happens just before the real post is saved)
+		if ( wp_is_post_revision( $post->ID ) )
+		{
+			return;
+		}//end if
+
+		// Check the permissions
+		if ( ! current_user_can( 'edit_post', $post->ID  ) )
+		{
+			return;
+		}//end if
+
+		$this->update_post_meta( $post->ID, $_POST );
+	}// end save_post
+
+	/**
+	 * handles the updating of post meta
+	 */
+	public function update_post_meta( $post_id, $post_data )
+	{
+		$save_meta = array(
+			'suppress-house-ctas' => FALSE,
+			'suppress-ads' => FALSE,
+		);
+
+		foreach ( $save_meta as $item => $default )
+		{
+			if ( isset( $post_data[ $this->id_base ][ $item ] ) )
+			{
+				$save_meta[ $item ] = $post_data[ $this->id_base ][ $item ] ? TRUE : FALSE;
+			}//end if
+		}//end foreach
+
+		update_post_meta( $post_id, 'go-contentwidgets', $save_meta );
+	}// end update_post_meta
 }//end class

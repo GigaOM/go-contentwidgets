@@ -37,7 +37,33 @@ class GO_ContentWidgets
 
 		// @todo this should only happen on `is_single`, but it was giving me trouble so I I'm moving on...
 		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) );
+		add_filter( 'post_class', array( $this, 'post_class' ), 10, 3 );
 	}//end init
+
+	/**
+	 * hooked to the post_class filter
+	 */
+	public function post_class( $classes, $class, $post_id )
+	{
+		if ( get_queried_object_id() != $post_id )
+		{
+			return $classes;
+		}//end if
+
+		$post_meta = get_post_meta( $post_id, $this->id_base, TRUE );
+
+		if ( ! empty( $post_meta['suppress-house-ctas'] ) )
+		{
+			$classes[] = 'suppress-house-ctas';
+		}//end if
+
+		if ( ! empty( $post_meta['suppress-ads'] ) )
+		{
+			$classes[] = 'suppress-ads';
+		}//end if
+
+		return $classes;
+	}//end post_class
 
 	/**
 	 * hooked to the WordPress after_setup_theme action
