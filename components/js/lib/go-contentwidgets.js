@@ -656,6 +656,17 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 			$injection_point.before( injectable.$el );
 		}//end else
 
+		// if the injectable is the first element in the story, make sure it is on the right no matter what
+		if (
+			injectable.$el.hasClass( 'layout-box-insert-left' )
+			&& (
+				! injectable.$el.position().top
+				|| ! injectable.$el.prev().length
+			)
+		) {
+			injectable.$el.removeClass( 'layout-box-insert-left' ).addClass( 'layout-box-insert-right' );
+		}//end if
+
 		// determine if the left injection overlaps an element that should push it to the right
 		// this is not super efficient, but we will be doing this rarely, so it's probably ok?
 
