@@ -41,6 +41,10 @@ if ( 'undefined' === typeof go_contentwidgets_admin ) {
 
 			go_contentwidgets_admin.refresh_fields();
 		});
+
+		$( '#go-contentwidgets-injections' ).dblclick( function() {
+			$( '#go-contentwidgets-suppress-ads-container' ).fadeIn( 'slow' );
+		});
 	};
 
 	/**

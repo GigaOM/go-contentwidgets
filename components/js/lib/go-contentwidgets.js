@@ -72,6 +72,11 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		this.$ad_b = $( document.getElementById( 'ad-b' ) );
 		this.$ad_c = $( document.getElementById( 'ad-c' ) );
 
+		this.$post = this.$content.closest( '.post' );
+
+		this.suppress_house_ctas = this.$post.hasClass( 'suppress-house-ctas' );
+		this.suppress_ads = this.$post.hasClass( 'suppress-ads' );
+
 		$( '.alignleft' ).each( function() {
 			var $el = $( this );
 			var $el_to_wrap = $();
@@ -205,9 +210,22 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 	go_contentwidgets.collect_widgets = function() {
 		go_contentwidgets.log( 'collecting widgets' );
-		this.$widgets = $( document.getElementById( 'hidden-sidebar' ) ).find( '> div:not(.widget_wijax)' );
+
+		var not = '.widget_wijax';
+
+		if ( this.suppress_house_ctas ) {
+			not += ',.go-thisorthat-widget';
+		}
+
+		if ( this.suppress_ads ) {
+			$( '.widget-go-ads' ).remove();
+		}
+
+		this.$widgets = $( document.getElementById( 'hidden-sidebar' ) ).find( '> div:not( ' + not + ' )' );
 		this.$widgets.each( function() {
-			go_contentwidgets.add_widget( $( this ) );
+			var $el = $( this );
+
+			go_contentwidgets.add_widget( $el );
 		} );
 		go_contentwidgets.log( 'finished collecting widgets' );
 	};
