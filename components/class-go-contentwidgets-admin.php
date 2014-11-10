@@ -168,7 +168,7 @@ class GO_ContentWidgets_Admin
 	 */
 	public function save_post( $post_id )
 	{
-		if ( ! isset( $_REQUEST['_go_contentwidgets_save_nonce'] ) || ! wp_verify_nonce( $_REQUEST['_go_contentwidgets_save_nonce'], 'go-contentwidgets-save' ) )
+		if ( ! isset( $_POST['_go_contentwidgets_save_nonce'] ) || ! wp_verify_nonce( $_POST['_go_contentwidgets_save_nonce'], 'go-contentwidgets-save' ) )
 		{
 			return;
 		}//end if
