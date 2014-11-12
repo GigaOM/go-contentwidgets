@@ -18,18 +18,7 @@ if ( 'undefined' === typeof go_contentwidgets_admin ) {
 
 		// when preferences are changed, save them in the local preference object
 		$( document ).on( 'change', '.go-contentwidgets-fields .layout-preference', function() {
-			var $el = $( this );
-			var $widget = $el.closest( '.widget' );
-
-			if ( 'undefined' === typeof go_contentwidgets_admin.layout_preferences[ $widget.attr( 'id' ) ] ) {
-				go_contentwidgets_admin.layout_preferences[ $widget.attr( 'id' ) ] = {};
-			}//end if
-
-			if ( $el.is( '.location' ) ) {
-				go_contentwidgets_admin.layout_preferences[ $widget.attr( 'id' ) ].location = $el.val();
-			} else {
-				go_contentwidgets_admin.layout_preferences[ $widget.attr( 'id' ) ].direction = $el.val();
-			}//end else
+			go_contentwidgets_admin.update_local_preferences( $( this ) );
 		});
 
 		// watch all ajax completions and if it is a completion of "save-widget", refresh the fields.
@@ -56,36 +45,67 @@ if ( 'undefined' === typeof go_contentwidgets_admin ) {
 	};
 
 	/**
+	 * updates the layout preferences for the given widget
+	 */
+	go_contentwidgets_admin.update_local_preferences = function( $el ) {
+		var $widget = $el.closest( '.widget' );
+		var widget_id = $widget.attr( 'id' ).replace( /widget-[0-9]+_/, '' );
+
+		if ( 'undefined' === typeof go_contentwidgets_admin.layout_preferences[ widget_id ] ) {
+			go_contentwidgets_admin.layout_preferences[ widget_id ] = {};
+		}//end if
+
+		if ( $el.is( '.location' ) ) {
+			go_contentwidgets_admin.layout_preferences[ widget_id ].location = $el.val();
+		} else {
+			go_contentwidgets_admin.layout_preferences[ widget_id ].direction = $el.val();
+		}//end else
+	};
+
+	/**
 	 * injects preference select box and auto-selects the current preference for the widget
 	 */
 	go_contentwidgets_admin.inject_fields = function() {
+		var $fields_template = $(
+			'<div class="go-contentwidgets-fields">' +
+				'<p class="go-contentwidgets-location-container">' +
+					'<label>' +
+						'Horizontal placement preference:' +
+					'</label>' +
+					'<select class="layout-preference location widefat">' +
+						'<option value="any">No preference</option>' +
+						'<option value="full">Full width</option>' +
+						'<option value="left">Left</option>' +
+						'<option value="right">Right</option>' +
+					'</select>' +
+				'</p>' +
+				'<p class="go-contentwidgets-direction-container">' +
+					'<label>' +
+						'Insert from the ' +
+					'</label>' +
+					'<select class="layout-preference direction widefat">' +
+						'<option value="">Top</option>' +
+						'<option value="bottom">Bottom</option>' +
+					'</select>' +
+				'</p>' +
+			'</div>'
+		);
+
 		this.$sidebar.find( '.widget' ).each( function() {
 			var $widget = $( this );
-			var widget_id = $widget.attr( 'id' );
-			var $fields = $(
-				'<div class="go-contentwidgets-fields">' +
-					'<p>' +
-						'<label for="go-contentwidgets_' + widget_id + '_location">' +
-							'Horizontal placement preference:' +
-						'</label>' +
-						'<select class="layout-preference location widefat" name="go-contentwidgets[' + widget_id + '][location]" id="go-contentwidgets_' + widget_id + '_location">' +
-							'<option value="any">No preference</option>' +
-							'<option value="full">Full width</option>' +
-							'<option value="left">Left</option>' +
-							'<option value="right">Right</option>' +
-						'</select>' +
-					'</p>' +
-					'<p>' +
-						'<label for="go-contentwidgets_' + widget_id + '_direction">' +
-							'Insert from the ' +
-						'</label>' +
-						'<select class="layout-preference direction widefat" name="go-contentwidgets[' + widget_id + '][direction]" id="go-contentwidgets_' + widget_id + '_direction">' +
-							'<option value="">top</option>' +
-							'<option value="bottom">bottom</option>' +
-						'</select>' +
-					'</p>' +
-				'</div>'
-			);
+			var widget_id = $widget.attr( 'id' ).replace( /widget-[0-9]+_/, '' );
+			var $fields = $fields_template.clone();
+
+			var $location_container = $fields.find( '.go-contentwidgets-location-container' );
+			var $direction_container = $fields.find( '.go-contentwidgets-direction-container' );
+
+			$location_container.find( 'label' ).attr( 'for', 'go-contentwidgets_' + widget_id + '_location' );
+			$location_container.find( 'select' ).attr( 'name', 'go-contentwidgets[' + widget_id + '][location]' ).attr( 'id', 'go-contentwidgets_' + widget_id + '_location' );
+
+			$direction_container.find( 'label' ).attr( 'for', 'go-contentwidgets_' + widget_id + '_direction' );
+			$direction_container.find( 'select' ).attr( 'name', 'go-contentwidgets[' + widget_id + '][direction]' ).attr( 'id', 'go-contentwidgets_' + widget_id + '_direction' );
+
+			$widget.find( '.widget-content' ).append( $fields );
 
 			if ( 'undefined' !== typeof go_contentwidgets_admin.layout_preferences[ widget_id ] ) {
 				if ( 'undefined' !== typeof go_contentwidgets_admin.layout_preferences[ widget_id ].location ) {
@@ -96,8 +116,6 @@ if ( 'undefined' === typeof go_contentwidgets_admin ) {
 					$fields.find( '.layout-preference.direction' ).val( go_contentwidgets_admin.layout_preferences[ widget_id ].direction );
 				}//end if
 			}//end if
-
-			$widget.find( '.widget-content' ).append( $fields );
 		});
 	};
 
