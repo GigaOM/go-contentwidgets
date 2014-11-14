@@ -332,8 +332,28 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		this.$images.each( function() {
 			var $img = $( this );
 
+			var style = $img.attr( 'style' );
+
+			// if there are legacy floats or clears, we need to toss them out
+			if ( 'undefined' !== typeof style && style ) {
+				if ( style.match( /float/ ) ) {
+					style = style.replace( /float\:[ \t]*(right|left);?/, '' );
+				}//end if
+
+				if ( style.match( /clear/ ) ) {
+					style = style.replace( /clear\:[ \t]*(right|left|both);?/, '' );
+				}//end if
+
+				$img.attr( 'style', style );
+			}
+
 			if ( $img.attr( 'width' ) < $img.closest( '.entry-content' ).width() ) {
-				$img.css( 'height', $img.attr( 'height' ).concat( 'px' ) );
+				var height = $img.attr( 'height' );
+
+				// only set the height from the attribute if there is one
+				if ( 'undefined' !== typeof height && height ) {
+					$img.css( 'height', $img.attr( 'height' ).concat( 'px' ) );
+				}//end if
 			} else {
 				$img.css( 'height', 'auto' );
 			}//end else
