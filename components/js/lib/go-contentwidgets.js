@@ -138,6 +138,10 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 	 * inject ads b and c into the content of a post
 	 */
 	go_contentwidgets.inject_small = function() {
+		if ( this.suppress_ads ) {
+			return;
+		}//end if
+
 		var $stuff = $( '.entry-content > .container > *:not(.layout-box-insert,.go-contentwidgets-spacer,.bookmarked-widget)' );
 		var $ad_b_container = this.$ad_b.closest( '.widget-go-ads' );
 		var $ad_c_container = this.$ad_c.closest( '.widget-go-ads' );
