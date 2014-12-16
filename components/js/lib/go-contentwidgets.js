@@ -654,12 +654,85 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		var $tmp;
 		go_contentwidgets.log( 'injecting injectable' );
 
+		var total_gap_height = 0;
+		var tallest_gap = null;
+
+		// let's pregame the gaps. We're finding the height of all gaps that could hold widgets
+		// as well as finding the tallest gap
+		for ( i = 0, length = this.inventory.gaps.length; i < length; i++ ) {
+			gap = this.inventory.gaps[ i ];
+			var gap_height = gap.$overlay.outerHeight();
+			if ( gap_height < this.shortest_widget_height ) {
+				continue;
+			}//end if
+
+			// is this gap the tallest one that we've found so far?
+			if (
+				null === tallest_gap
+				|| gap_height > this.inventory.gaps[ tallest_gap ].$overlay.outerHeight()
+			) {
+				tallest_gap = i;
+			}//end else if
+
+			total_gap_height += gap_height;
+		}//end for
+
+		// find a place to inject the injectable
 		for ( i = 0, length = this.inventory.gaps.length; i < length; i++ ) {
 			gap = this.attributes( this.inventory.gaps[ i ].$overlay );
 			gap.$overlay = this.inventory.gaps[ i ].$overlay;
 			gap.$first_el = this.inventory.gaps[ i ].$first_el;
+
+			// if we are inserting the tallest widget, let's stick it in the biggest gap
+			if ( injectable.height === this.tallest_widget_height ) {
+				if ( i !== tallest_gap ) {
+					continue;
+				}//end if
+			}//end if
+
 			if ( gap.height > injectable.height ) {
 				$injection_point = gap.$first_el;
+
+				// let's find all widgets that aren't the one we're injecting (which is the first one)
+				var $remaining = $( document.getElementById( 'hidden-sidebar' ) ).find( '> div:not(.widget_wijax)' ).filter( ':not(:first-child)' );
+				var remaining_height = 0;
+
+				// find the height of all those widgets
+				$remaining.each( function() {
+					remaining_height += $( this ).outerHeight();
+				});
+
+				// let's store off the next injection point because we'll probably need it
+				var $next = $injection_point.next();
+
+				// external_height holds the total gap height that isn't the gap we're in
+				var external_height = total_gap_height - gap.height;
+
+				// let's find how much vertical height we need inside THIS gap, which is the height of remaining injectables minus
+				// the height outside of this gap
+				var room_needed_inside_gap = remaining_height - external_height;
+
+				// if there is more height outside of this gap than there are combined pixels on the remaining injectables, then
+				// room_needed_inside_gap is negative. Which means we need 0 pixels in height for other widgets.
+				if ( room_needed_inside_gap <= 0 ) {
+					room_needed_inside_gap = 0;
+				}//end if
+
+				// while we're able to shift the element down, let's do so
+				while (
+					// if we're in the first gap, let's not shift down
+					gap.start > 0
+					// is there enough space to shift the injectable down and still inject other widgets?
+					&& ( gap.height - injectable.height > room_needed_inside_gap )
+					// IS there as next space?
+					&& $next.length
+					// Is the space at the top of the gap smaller than the "free" space at the bottom of the gap?
+					&& ( $next.position().top - gap.start ) < ( gap.end - $next.position().top - room_needed_inside_gap )
+				) {
+					// Yup! move the injection point
+					$injection_point = $next;
+					$next = $injection_point.next();
+				}//end while
 
 				if ( injectable.preferbottom ) {
 					// find the last injection_point in the gap where injectable will fit
