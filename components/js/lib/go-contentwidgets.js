@@ -372,6 +372,40 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		// so our CSS will work as expected
 		this.$images.css( 'height', '' );
 
+		// now that we've inserted everything, let's balance the items out
+		var $injected = $( '.layout-box-insert' );
+		$injected.each( function( i ) {
+			var $el = $( this );
+
+			if ( 0 === i || $injected.length === i - 1 ) {
+				return;
+			}//end if
+
+			var sibling_selector = go_contentwidgets.blackout_selector.replace( '> ', '' );
+
+			// add two classes to look for at the end of the selector
+			sibling_selector = sibling_selector.replace( /\)$/, ',.go-contentwidgets-spacer,.layout-box-thing)' );
+
+			// find the previous and next blocking elements
+			var $prev = $el.prevAll( sibling_selector );
+			var $next = $el.nextAll( sibling_selector );
+
+			// if there is a previous and a next, let's try to balance the element
+			if ( ! $prev.length || ! $next.length ) {
+				return;
+			}//end if
+
+			var el_height = parseInt( $el.outerHeight( true ), 10 );
+			var above = $el.get( 0 ).offsetTop - ( $prev.get( 0 ).offsetTop + parseInt( $prev.outerHeight( true ), 10 ) );
+			var below = $next.get( 0 ).offsetTop - ( $el.get( 0 ).offsetTop + el_height );
+
+			// if there is less space above the injected item than there is below, attempt to even that out a bit
+			if ( above < below ) {
+				// the distance should be the space above the injectable plus the space above divided by 2 MINUS the space above
+				go_contentwidgets.adjust_down( $el, ( ( above + below ) / 2 ) - above );
+			}
+		});
+
 		this.full_inject_complete = true;
 	};
 
