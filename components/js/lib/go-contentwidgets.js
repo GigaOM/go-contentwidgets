@@ -401,7 +401,8 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 			// if there is less space above the injected item than there is below, attempt to even that out a bit
 			if ( above < below ) {
-				go_contentwidgets.adjust_down( $el, ( above + below ) / 2 );
+				// the distance should be the space above the injectable plus the space above divided by 2 MINUS the space above
+				go_contentwidgets.adjust_down( $el, ( ( above + below ) / 2 ) - above );
 			}
 		});
 
