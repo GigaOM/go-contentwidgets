@@ -45,9 +45,11 @@ class GO_ContentWidgets_Admin
 	 */
 	private function register_resources()
 	{
+		$js_min = ( defined( 'GO_DEV' ) && GO_DEV ) ? 'lib' : 'min';
+
 		wp_register_script(
 			go_contentwidgets()->id_base . '-admin',
-			plugins_url( 'js/lib/go-contentwidgets-admin.js', __FILE__ ),
+			plugins_url( 'js/' . $js_min . '/go-contentwidgets-admin.js', __FILE__ ),
 			array( 'jquery' ),
 			go_contentwidgets()->script_config( 'version' ),
 			TRUE

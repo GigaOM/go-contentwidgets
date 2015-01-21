@@ -25,9 +25,11 @@ class GO_ContentWidgets
 	 */
 	public function init()
 	{
+		$js_min = ( defined( 'GO_DEV' ) && GO_DEV ) ? 'lib' : 'min';
+
 		wp_register_script(
 			$this->id_base,
-			plugins_url( 'js/lib/go-contentwidgets.js', __FILE__ ),
+			plugins_url( 'js/' . $js_min . '/go-contentwidgets.js', __FILE__ ),
 			array( 'jquery' ),
 			$this->script_config( 'version' ),
 			TRUE
