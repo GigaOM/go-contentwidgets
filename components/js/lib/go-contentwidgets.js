@@ -386,6 +386,13 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 			// add two classes to look for at the end of the selector
 			sibling_selector = sibling_selector.replace( /\)$/, ',span,a,.go-contentwidgets-spacer,.layout-box-thing)' );
 
+			// if the injectable is on the left, we need to consider blockquotes, uls, and ols as blockers
+			if ( $el.is( '.layout-box-insert-left' ) ) {
+				sibling_selector = sibling_selector.replace( ',blockquote', '' );
+				sibling_selector = sibling_selector.replace( ',ul', '' );
+				sibling_selector = sibling_selector.replace( ',ol', '' );
+			}//end if
+
 			// find the previous and next blocking elements
 			var $maybe_prev = $el.prevAll( '*' );
 			var $maybe_next = $el.nextAll( '*' );
