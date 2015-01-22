@@ -373,31 +373,69 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 		this.$images.css( 'height', '' );
 
 		// now that we've inserted everything, let's balance the items out
-		var $injected = $( '.layout-box-insert' );
+		var $injected = go_contentwidgets.$content.find( '.layout-box-insert' );
 		$injected.each( function( i ) {
 			var $el = $( this );
 
-			if ( 0 === i || $injected.length === i - 1 ) {
+			if ( 0 === i ) {
 				return;
 			}//end if
 
 			var sibling_selector = go_contentwidgets.blackout_selector.replace( '> ', '' );
 
 			// add two classes to look for at the end of the selector
-			sibling_selector = sibling_selector.replace( /\)$/, ',.go-contentwidgets-spacer,.layout-box-thing)' );
+			sibling_selector = sibling_selector.replace( /\)$/, ',span,a,.go-contentwidgets-spacer,.layout-box-thing)' );
 
 			// find the previous and next blocking elements
-			var $prev = $el.prevAll( sibling_selector );
-			var $next = $el.nextAll( sibling_selector );
+			var $maybe_prev = $el.prevAll( '*' );
+			var $maybe_next = $el.nextAll( '*' );
+
+			var $prev = $();
+			var $next = $();
+
+			// we need to manually build the prev collection because sometimes we have blockers as children of other non-blocking elements (p, ul, ol)
+			$maybe_prev.each( function() {
+				var $current = $( this );
+				if ( $current.is( sibling_selector ) ) {
+					$prev = $prev.add( $current );
+				} else {
+					if ( $current.is( 'p,ul,ol,blockquote' ) ) {
+						$prev = $prev.add( $current.find( sibling_selector ) );
+					}//end if
+				}//end else
+			});
+
+			// we need to manually build the next collection because sometimes we have blockers as children of other non-blocking elements (p, ul, ol)
+			$maybe_next.each( function() {
+				var $current = $( this );
+				if ( $current.is( sibling_selector ) ) {
+					$next = $next.add( $current );
+				} else {
+					if ( $current.is( 'p,ul,ol,blockquote' ) ) {
+						$next = $next.add( $current.find( sibling_selector ) );
+					}//end if
+				}//end else
+			});
 
 			// if there is a previous and a next, let's try to balance the element
-			if ( ! $prev.length || ! $next.length ) {
+			if ( ! $prev.length ) {
 				return;
 			}//end if
 
+			// reverse the prev collection so the first element is the closet to the injectable
+			$prev = $( $prev.get().reverse() );
+
 			var el_height = parseInt( $el.outerHeight( true ), 10 );
 			var above = $el.get( 0 ).offsetTop - ( $prev.get( 0 ).offsetTop + parseInt( $prev.outerHeight( true ), 10 ) );
-			var below = $next.get( 0 ).offsetTop - ( $el.get( 0 ).offsetTop + el_height );
+			var below;
+
+			if ( $next.length ) {
+				// if there are more blockers after this one, compute the distance that is shiftable based on the next item
+				below = $next.get( 0 ).offsetTop - ( $el.get( 0 ).offsetTop + el_height );
+			} else {
+				// if this is the last item in the post, then use the bottom of the post to compute the shiftable distance
+				below = parseInt( go_contentwidgets.$content.outerHeight( true ), 10 ) - ( $el.get( 0 ).offsetTop + el_height );
+			}//end else
 
 			// if there is less space above the injected item than there is below, attempt to even that out a bit
 			if ( above < below ) {
@@ -515,7 +553,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 	go_contentwidgets.adjust_down = function( $injectable, distance ) {
 		var alignment_class = 'layout-box-insert-right';
 
-		distance = Math.round( distance / 8 ) * 8;
+		distance = Math.round( distance / 27 ) * 27;
 
 		if ( ! $injectable.hasClass( alignment_class ) ) {
 			alignment_class = 'layout-box-insert-left';
