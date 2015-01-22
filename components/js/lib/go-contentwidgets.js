@@ -383,7 +383,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 
 			var sibling_selector = go_contentwidgets.blackout_selector.replace( '> ', '' );
 
-			// add two classes to look for at the end of the selector
+			// add two classes and some other inline elements to look for at the end of the selector
 			sibling_selector = sibling_selector.replace( /\)$/, ',span,a,.go-contentwidgets-spacer,.layout-box-thing)' );
 
 			// if the injectable is on the left, we need to consider blockquotes, uls, and ols as blockers
@@ -424,7 +424,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 				}//end else
 			});
 
-			// if there is a previous and a next, let's try to balance the element
+			// if there isn't a previous, let's bail and not try to balance the element
 			if ( ! $prev.length ) {
 				return;
 			}//end if
