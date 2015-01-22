@@ -782,7 +782,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 				});
 
 				// let's store off the next injection point because we'll probably need it
-				var $next = $injection_point.next();
+				var $next = $injection_point.next( ':not(.layout-box-insert,.layout-box-thing)' );
 
 				// external_height holds the total gap height that isn't the gap we're in
 				var external_height = total_gap_height - gap.height;
@@ -810,7 +810,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 				) {
 					// Yup! move the injection point
 					$injection_point = $next;
-					$next = $injection_point.next();
+					$next = $injection_point.next( ':not(.layout-box-insert,.layout-box-thing)' );
 				}//end while
 
 				if ( injectable.preferbottom ) {
