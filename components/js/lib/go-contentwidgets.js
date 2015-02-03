@@ -384,7 +384,7 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 			var sibling_selector = go_contentwidgets.blackout_selector.replace( '> ', '' );
 
 			// add two classes and some other inline elements to look for at the end of the selector
-			sibling_selector = sibling_selector.replace( /\)$/, ',span,a,.go-contentwidgets-spacer,.layout-box-thing)' );
+			sibling_selector = sibling_selector.replace( /\)$/, ',span:not([class^="embed-"]),a,.go-contentwidgets-spacer,.layout-box-thing)' );
 
 			// if the injectable is on the left, we need to consider blockquotes, uls, and ols as blockers
 			if ( $el.is( '.layout-box-insert-left' ) ) {
