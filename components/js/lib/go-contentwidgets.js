@@ -807,6 +807,8 @@ if ( 'undefined' === typeof go_contentwidgets ) {
 					&& $next.length
 					// Is the space at the top of the gap smaller than the "free" space at the bottom of the gap?
 					&& ( $next.position().top - gap.start ) < ( gap.end - $next.position().top - room_needed_inside_gap )
+					// Is there enough room to shift the injectable down without overflowing the next blackout?
+					&& ( $next.position().top + injectable.height ) < gap.end
 				) {
 					// Yup! move the injection point
 					$injection_point = $next;
